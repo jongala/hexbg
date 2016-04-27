@@ -47,6 +47,24 @@
         return ctx;
     }
 
+    function getAlignedGrid(w, h, scale) {
+        var points = [];
+
+        var hexW = scale * 0.8660;
+        var hexH = scale;
+
+        var xSteps = Math.ceil(w/hexW);
+        var ySteps = Math.ceil(h/hexH);
+
+        for (var i = 0 ; i <= ySteps ; i++) {
+            for (var j = 0 ; j <= xSteps ; j++) {
+                points.push([j * hexW, i * hexH]);
+            }
+        }
+
+        return points;
+    }
+
     function hexBg(container, scale, palette) {
         scale = scale || 256;
 
@@ -57,19 +75,7 @@
         var w = container.offsetWidth;
         var h = container.offsetHeight;
 
-        var hexW = scale * 0.8660;
-        var hexH = scale;
-
-        //
-        var xSteps = Math.ceil(w/hexW);
-        var ySteps = Math.ceil(h/hexH);
-
-        var points = [];
-        for (var i = 0 ; i <= ySteps ; i++) {
-            for (var j = 0 ; j <= xSteps ; j++) {
-                points.push([j * hexW, i * hexH]);
-            }
-        }
+        var points = getAlignedGrid(w, h, scale);
 
         var el = container.querySelector('canvas');
         if (!el) {
