@@ -115,6 +115,7 @@
         var defaults = {
             scale: 256,
             grid: 'aligned', // [aligned, spaced]
+            pointR: 0.1,
             fillOpacity: 1,
             strokeOpacity: 1,
             pointOpacity: 1,
@@ -152,7 +153,7 @@
         }
 
         // center point radius
-        var r = opts.scale/10;
+        var r = opts.scale * opts.pointR;
 
         points.forEach(function(p, i) {
             drawHex(ctx, p[0], p[1], opts.scale,
