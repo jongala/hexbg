@@ -60,7 +60,7 @@
     }
 
     // Generates points for overlapping tiles
-    function getAlignedGrid(w, h, scale) {
+    function getOverlapLayout(w, h, scale) {
         var points = [];
 
         var hexW = scale * 0.8660;
@@ -79,7 +79,7 @@
     }
 
     // Generates points for non-overlapping tiling
-    function getSpacedGrid(w, h, scale) {
+    function getTiledLayout(w, h, scale) {
         var points = [];
 
         var hexW = 2 * scale * 0.8660;
@@ -101,9 +101,9 @@
     }
 
     // Map grid functions to option names
-    var gridFunctions = {
-        'aligned': getAlignedGrid,
-        'spaced': getSpacedGrid
+    var layoutFunctions = {
+        'overlap': getOverlapLayout,
+        'tile': getTiledLayout
     };
 
     // Turn constants into functions which return the constant
@@ -118,7 +118,7 @@
     function hexBg(container, options) {
         var defaults = {
             scale: 256,
-            grid: 'aligned', // [aligned, spaced]
+            layout: 'tile', // [tile, overlap]
             pointR: 0.1,
             fillOpacity: 1,
             strokeOpacity: 1,
@@ -141,8 +141,8 @@
         var h = container.offsetHeight;
 
         // get hex spacing function, generate hex points
-        var gridFunc = gridFunctions[opts.grid] || getAlignedGrid;
-        var points = gridFunc(w, h, opts.scale);
+        var layoutFunc = layoutFunctions[opts.layout] || getTiledLayout;
+        var points = layoutFunc(w, h, opts.scale);
 
         // Find or create canvas child
         var el = container.querySelector('canvas');
