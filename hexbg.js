@@ -1,10 +1,16 @@
 (function(){
-
-    // Default palette
-    var PALETTE = ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'];
+    // simple object extender
+    function extend(dest, src) {
+        for (k in src) {
+            if (src.hasOwnProperty(k)) {
+                dest[k] = src[k];
+            }
+        }
+        return dest;
+    }
 
     // Random palette member
-    function randomColor() {
+    function randomColor(PALETTE) {
       return (PALETTE[Math.floor(PALETTE.length * Math.random())]);
     }
 
@@ -65,17 +71,30 @@
         return points;
     }
 
-    function hexBg(container, scale, palette) {
-        scale = scale || 256;
+    function getSpacedGrid(w, h, scale) {
+        return [];
+    }
 
-        if (palette !== undefined) {
-            PALETTE = palette;
-        }
+    var gridFunctions = {
+        'aligned': getAlignedGrid,
+        'spaced': getSpacedGrid
+    };
+
+    function hexBg(container, options) {
+        var defaults = {
+            scale: 256,
+            grid: 'aligned', // [aligned, spaced]
+            palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00']
+        };
+        var opts = {};
+        opts = extend(extend(opts, defaults), options);
 
         var w = container.offsetWidth;
         var h = container.offsetHeight;
 
-        var points = getAlignedGrid(w, h, scale);
+        var gridFunc = gridFunctions[opts.grid] || getAlignedGrid;
+
+        var points = gridFunc(w, h, opts.scale);
 
         var el = container.querySelector('canvas');
         if (!el) {
@@ -87,7 +106,7 @@
 
         ctx.strokeStyle = "#000000";
 
-        var r = scale/10;
+        var r = opts.scale/10;
 
         points.forEach(function(p, i) {
             ctx.globalAlpha = 1;
@@ -99,7 +118,7 @@
 
             ctx.moveTo(p[0], p[1]);
             ctx.globalAlpha = 0.5;
-            drawHex(ctx, p[0], p[1], scale, randomColor(), 0);
+            drawHex(ctx, p[0], p[1], opts.scale, randomColor(opts.palette), 0);
         });
 
         container.appendChild(el);
