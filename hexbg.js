@@ -9,11 +9,22 @@
         return dest;
     }
 
+    // Turn constants into functions which return the constant,
+    // used to allow passing colors as strings or functions
+    function constToFunc(x) {
+        if (typeof x !== "function") {
+            return function(){return x;}
+        } else {
+            return x;
+        }
+    }
+
     // Random palette member
     function randomColor(PALETTE) {
       return (PALETTE[Math.floor(PALETTE.length * Math.random())]);
     }
 
+    // Returns an array of [x, y] points describing a hexagon
     function getShapeCoords(x, y, size, angle) {
         var c = [];
         var points = 6;
@@ -28,6 +39,7 @@
         return c;
     }
 
+    // Draw a hexagon into ctx with the passed characteristics
     function drawHex(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
         if (!ctx) return;
         size = size || 256;
@@ -54,13 +66,11 @@
         return ctx;
     }
 
-    // Generates points for overlapping tiles
+    // Generates hexagon center-points for overlapping tiles
     function getOverlapLayout(w, h, scale) {
         var points = [];
-
         var hexW = scale * 0.8660;
         var hexH = scale;
-
         var rows = Math.ceil(h/hexH);
         var cols = Math.ceil(w/hexW);
 
@@ -75,16 +85,13 @@
         return points;
     }
 
-    // Generates points for non-overlapping tiling
+    // Generates hexagon center-points for non-overlapping tiling
     function getTiledLayout(w, h, scale) {
         var points = [];
-
         var hexW = 2 * scale * 0.8660;
         var hexH = scale * 1.5;
-
         var rows = Math.ceil(h/hexH);
         var cols = Math.ceil(w/hexW);
-
         var offset;
 
         for (var row = 0 ; row <= rows ; row++) {
@@ -105,15 +112,7 @@
         'tile': getTiledLayout
     };
 
-    // Turn constants into functions which return the constant
-    function constToFunc(x) {
-        if (typeof x !== "function") {
-            return function(){return x;}
-        } else {
-            return x;
-        }
-    }
-
+    // Tile the container
     function hexBg(container, options) {
         var defaults = {
             scale: 256,
@@ -139,7 +138,7 @@
         var w = container.offsetWidth;
         var h = container.offsetHeight;
 
-        // get hex spacing function, generate hex points
+        // get hex layout function, generate hex points
         var layoutFunc = layoutFunctions[opts.layout] || getTiledLayout;
         var points = layoutFunc(w, h, opts.scale);
 
