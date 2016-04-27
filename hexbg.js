@@ -101,6 +101,7 @@
         var defaults = {
             scale: 256,
             grid: 'aligned', // [aligned, spaced]
+            fillOpacity: 1,
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00']
         };
         var opts = {};
@@ -121,21 +122,21 @@
         el.height = container.offsetHeight;
         ctx = el.getContext('2d');
 
-        ctx.strokeStyle = "#000000";
+        ctx.strokeStyle = "#FFFFFF";
 
         var r = opts.scale/10;
 
         points.forEach(function(p, i) {
+            ctx.moveTo(p[0], p[1]);
+            ctx.globalAlpha = opts.fillOpacity;
+            drawHex(ctx, p[0], p[1], opts.scale, randomColor(opts.palette), 0);
+
             ctx.globalAlpha = 1;
             ctx.beginPath();
             ctx.moveTo(p[0] + r, p[1]);
             ctx.arc(p[0], p[1], r, 0, 2*Math.PI, false);
             ctx.stroke();
             ctx.closePath();
-
-            ctx.moveTo(p[0], p[1]);
-            ctx.globalAlpha = 0.5;
-            drawHex(ctx, p[0], p[1], opts.scale, randomColor(opts.palette), 0);
         });
 
         container.appendChild(el);

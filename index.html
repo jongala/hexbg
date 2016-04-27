@@ -11,9 +11,7 @@
             right: 0;
         }
 
-        #tiled {
-            border: 1px solid red;
-        }
+        #tiled {}
 
         .controls {
             position: relative;
@@ -24,7 +22,8 @@
 <body>
     <div id="tiled"></div>
     <div class="controls">
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, grid: 'aligned'})">Tile bg</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, grid: 'aligned', fillOpacity: 0.5})">Tile aligned</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, grid: 'spaced'})">Tile spaced</button>
     </div>
     <script src="hexbg.js"></script>
 </body>
