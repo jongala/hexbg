@@ -23,9 +23,18 @@
     <div id="tiled"></div>
     <div class="controls">
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, grid: 'aligned', fillOpacity: 0.5})">Tile aligned</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, grid: 'spaced', pointOpacity: 0.3, fillColor: function(p, i, x, y, w, h){
-        return 'rgb(' + [Math.floor(255 * (w-x  )/w), 0, Math.floor(190 * (h - y)/h)].join(',') + ')';},strokeOpacity: 0, strokeColor: function(p){return '#800080'}})">Tile spaced</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, grid: 'spaced', pointOpacity: 0.5, fillColor: blendPlane,strokeOpacity: 1, strokeColor: blendPlane})">Tile spaced</button>
     </div>
     <script src="hexbg.js"></script>
+    <script type="text/javascript">
+        blendPlane = function(p, i, x, y, w, h){
+            var vals = [
+                Math.floor(255 * (w-x  )/w),
+                0,
+                Math.floor(190 * (h - y)/h)
+            ];
+            return 'rgb(' + vals.join(',') + ')';
+        }
+    </script>
 </body>
 </html>

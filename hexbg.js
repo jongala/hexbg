@@ -103,6 +103,14 @@
         'spaced': getSpacedGrid
     };
 
+    function constToFunc(x) {
+        if (typeof x !== "function") {
+            return function(){return x;}
+        } else {
+            return x;
+        }
+    }
+
     function hexBg(container, options) {
         var defaults = {
             scale: 256,
@@ -118,6 +126,11 @@
         };
         var opts = {};
         opts = extend(extend(opts, defaults), options);
+
+        // convert color constants to functions
+        opts.pointColor = constToFunc(opts.pointColor);
+        opts.strokeColor = constToFunc(opts.strokeColor);
+        opts.fillColor = constToFunc(opts.fillColor);
 
         var w = container.offsetWidth;
         var h = container.offsetHeight;
@@ -142,13 +155,12 @@
         var r = opts.scale/10;
 
         points.forEach(function(p, i) {
-            ctx.strokeStyle = opts.pointColor(opts.palette, i, p[0], p[1], w, h);
-            ctx.moveTo(p[0], p[1]);
             drawHex(ctx, p[0], p[1], opts.scale,
                 opts.fillColor(opts.palette, i, p[0], p[1], w, h),
                 opts.strokeColor(opts.palette, i, p[0], p[1], w, h),
                 opts.fillOpacity, opts.strokeOpacity);
 
+            ctx.strokeStyle = opts.pointColor(opts.palette, i, p[0], p[1], w, h);
             ctx.globalAlpha = opts.pointOpacity;
             ctx.beginPath();
             ctx.moveTo(p[0] + r, p[1]);
