@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title>Hexagons</title>
+    <style type="text/css">
+        #tiled,
+        #tiled canvas {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #tiled {
+            border: 1px solid red;
+        }
+        
+        .controls {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="tiled"></div>
+    <div class="controls">
+        <button onclick="hexBg(document.getElementById('tiled'), 256)">Tile bg</button>
+    </div>
+    <script src="hexbg.js"></script>
+</body>
+</html>
