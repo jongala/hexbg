@@ -28,7 +28,12 @@
         return c;
     }
 
-    function drawCoords(ctx, coords, fillColor, strokeColor, fillOpacity, strokeOpacity){
+    function drawHex(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
+        if (!ctx) return;
+        size = size || 256;
+
+        var coords = getShapeCoords(x, y, size);
+
         fillColor = fillColor || "#FF0099";
         ctx.fillStyle = fillColor;
         ctx.beginPath();
@@ -45,16 +50,6 @@
             ctx.stroke();
         }
         ctx.closePath();
-        return ctx;
-    }
-
-    function drawHex(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
-        if (!ctx) return;
-        size = size || 256;
-
-        var coords = getShapeCoords(x, y, size);
-
-        drawCoords(ctx, coords, fillColor, strokeColor, fillOpacity, strokeOpacity);
 
         return ctx;
     }
