@@ -102,7 +102,12 @@
             scale: 256,
             grid: 'aligned', // [aligned, spaced]
             fillOpacity: 1,
-            palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00']
+            strokeOpacity: 1,
+            pointOpacity: 1,
+            strokeColor: function(palette, i, x, y, w, h) {return "#ffffff"},
+            fillColor: function(palette, i, x, y, w, h) {return randomColor(palette)},
+            palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
+            clear: true
         };
         var opts = {};
         opts = extend(extend(opts, defaults), options);
@@ -122,16 +127,21 @@
         el.height = container.offsetHeight;
         ctx = el.getContext('2d');
 
-        ctx.strokeStyle = "#FFFFFF";
+        if (opts.clear) {
+            ctx.clearRect(0, 0, w, h);
+        }
 
+        // center point radius
         var r = opts.scale/10;
 
         points.forEach(function(p, i) {
+            ctx.strokeStyle = opts.strokeColor(opts.palette, i, p[0], p[1], w, h);
             ctx.moveTo(p[0], p[1]);
             ctx.globalAlpha = opts.fillOpacity;
-            drawHex(ctx, p[0], p[1], opts.scale, randomColor(opts.palette), 0);
+            drawHex(ctx, p[0], p[1], opts.scale,
+                opts.fillColor(opts.palette, i, p[0], p[1], w, h), 0);
 
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = opts.pointOpacity;
             ctx.beginPath();
             ctx.moveTo(p[0] + r, p[1]);
             ctx.arc(p[0], p[1], r, 0, 2*Math.PI, false);
