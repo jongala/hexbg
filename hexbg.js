@@ -66,12 +66,12 @@
         var hexW = scale * 0.8660;
         var hexH = scale;
 
-        var xSteps = Math.ceil(w/hexW);
-        var ySteps = Math.ceil(h/hexH);
+        var rows = Math.ceil(h/hexH);
+        var cols = Math.ceil(w/hexW);
 
-        for (var i = 0 ; i <= ySteps ; i++) {
-            for (var j = 0 ; j <= xSteps ; j++) {
-                points.push([j * hexW, i * hexH]);
+        for (var row = 0 ; row <= rows ; row++) {
+            for (var col = 0 ; col <= cols ; col++) {
+                points.push([col * hexW, row * hexH]);
             }
         }
 
@@ -85,15 +85,15 @@
         var hexW = 2 * scale * 0.8660;
         var hexH = scale * 1.5;
 
-        var xSteps = Math.ceil(w/hexW);
-        var ySteps = Math.ceil(h/hexH);
+        var rows = Math.ceil(h/hexH);
+        var cols = Math.ceil(w/hexW);
 
         var offset;
 
-        for (var i = 0 ; i <= ySteps ; i++) {
-            for (var j = 0 ; j <= xSteps ; j++) {
-                offset = (i % 2)? (- scale * 0.8660 ) : 0;
-                points.push([j * hexW + offset, i * hexH]);
+        for (var row = 0 ; row <= rows ; row++) {
+            for (var col = 0 ; col <= cols ; col++) {
+                offset = (row % 2)? (- scale * 0.8660 ) : 0;
+                points.push([col * hexW + offset, row * hexH]);
             }
         }
 
