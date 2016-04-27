@@ -28,27 +28,33 @@
         return c;
     }
 
-    function drawCoords(ctx, coords, color){
-        color = color || "#FF0099";
-        ctx.fillStyle = color;
+    function drawCoords(ctx, coords, fillColor, strokeColor, fillOpacity, strokeOpacity){
+        fillColor = fillColor || "#FF0099";
+        ctx.fillStyle = fillColor;
         ctx.beginPath();
         var origin = coords.shift();
         ctx.moveTo(origin[0], origin[1]);
         coords.forEach(function(p, i){
             ctx.lineTo(p[0], p[1]);
         })
+        ctx.globalAlpha = fillOpacity;
         ctx.fill();
+        if (strokeColor) {
+            ctx.strokeStyle = strokeColor;
+            ctx.globalAlpha = strokeOpacity;
+            ctx.stroke();
+        }
         ctx.closePath();
         return ctx;
     }
 
-    function drawHex(ctx, x, y, size, color, angle) {
+    function drawHex(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
         if (!ctx) return;
         size = size || 256;
 
-        var coords = getShapeCoords(x, y, size, angle);
+        var coords = getShapeCoords(x, y, size);
 
-        drawCoords(ctx, coords, color);
+        drawCoords(ctx, coords, fillColor, strokeColor, fillOpacity, strokeOpacity);
 
         return ctx;
     }
@@ -105,7 +111,7 @@
             strokeOpacity: 1,
             pointOpacity: 1,
             pointColor: function(palette, i, x, y, w, h) {return "#ffffff"},
-            strokeColor: function(palette, i, x, y, w, h) {return "#ffffff"},
+            strokeColor: function(palette, i, x, y, w, h) {return null},
             fillColor: function(palette, i, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
             clear: true
@@ -138,9 +144,10 @@
         points.forEach(function(p, i) {
             ctx.strokeStyle = opts.pointColor(opts.palette, i, p[0], p[1], w, h);
             ctx.moveTo(p[0], p[1]);
-            ctx.globalAlpha = opts.fillOpacity;
             drawHex(ctx, p[0], p[1], opts.scale,
-                opts.fillColor(opts.palette, i, p[0], p[1], w, h), 0);
+                opts.fillColor(opts.palette, i, p[0], p[1], w, h),
+                opts.strokeColor(opts.palette, i, p[0], p[1], w, h),
+                opts.fillOpacity, opts.strokeOpacity);
 
             ctx.globalAlpha = opts.pointOpacity;
             ctx.beginPath();
