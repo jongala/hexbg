@@ -70,9 +70,11 @@
         var cols = Math.ceil(w/hexW);
 
         for (var row = 0 ; row <= rows ; row++) {
+            var r = [];
             for (var col = 0 ; col <= cols ; col++) {
-                points.push([col * hexW, row * hexH]);
+                r.push([col * hexW, row * hexH]);
             }
+            points.push(r);
         }
 
         return points;
@@ -91,10 +93,12 @@
         var offset;
 
         for (var row = 0 ; row <= rows ; row++) {
+            var r = [];
             for (var col = 0 ; col <= cols ; col++) {
                 offset = (row % 2)? (- scale * 0.8660 ) : 0;
-                points.push([col * hexW + offset, row * hexH]);
+                r.push([col * hexW + offset, row * hexH]);
             }
+            points.push(r);
         }
 
         return points;
@@ -123,9 +127,9 @@
             fillOpacity: 1,
             strokeOpacity: 1,
             pointOpacity: 1,
-            pointColor: function(palette, i, x, y, w, h) {return "#ffffff"},
-            strokeColor: function(palette, i, x, y, w, h) {return null},
-            fillColor: function(palette, i, x, y, w, h) {return randomColor(palette)},
+            pointColor: function(palette, row, col, x, y, w, h) {return "#ffffff"},
+            strokeColor: function(palette, row, col, x, y, w, h) {return null},
+            fillColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
             clear: true
         };
@@ -161,22 +165,24 @@
         }
 
         // center point radius
-        var r = opts.scale * opts.pointR;
+        var pr = opts.scale * opts.pointR;
 
         // draw hexagons
-        points.forEach(function(p, i) {
-            drawHex(ctx, p[0], p[1], opts.scale,
-                opts.fillColor(opts.palette, i, p[0], p[1], w, h),
-                opts.strokeColor(opts.palette, i, p[0], p[1], w, h),
-                opts.fillOpacity, opts.strokeOpacity);
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                drawHex(ctx, p[0], p[1], opts.scale,
+                    opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
+                    opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
+                    opts.fillOpacity, opts.strokeOpacity);
 
-            ctx.strokeStyle = opts.pointColor(opts.palette, i, p[0], p[1], w, h);
-            ctx.globalAlpha = opts.pointOpacity;
-            ctx.beginPath();
-            ctx.moveTo(p[0] + r, p[1]);
-            ctx.arc(p[0], p[1], r, 0, 2*Math.PI, false);
-            ctx.stroke();
-            ctx.closePath();
+                ctx.strokeStyle = opts.pointColor(opts.palette, row, col, p[0], p[1], w, h);
+                ctx.globalAlpha = opts.pointOpacity;
+                ctx.beginPath();
+                ctx.moveTo(p[0] + pr, p[1]);
+                ctx.arc(p[0], p[1], pr, 0, 2*Math.PI, false);
+                ctx.stroke();
+                ctx.closePath();
+            });
         });
 
         // if new canvas child was created, append it
