@@ -72,7 +72,24 @@
     }
 
     function getSpacedGrid(w, h, scale) {
-        return [];
+        var points = [];
+
+        var hexW = 2 * scale * 0.8660;
+        var hexH = scale * 1.5;
+
+        var xSteps = Math.ceil(w/hexW);
+        var ySteps = Math.ceil(h/hexH);
+
+        var offset;
+
+        for (var i = 0 ; i <= ySteps ; i++) {
+            for (var j = 0 ; j <= xSteps ; j++) {
+                offset = (i % 2)? (- scale * 0.8660 ) : 0;
+                points.push([j * hexW + offset, i * hexH]);
+            }
+        }
+
+        return points;
     }
 
     var gridFunctions = {
