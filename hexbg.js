@@ -59,6 +59,7 @@
         return ctx;
     }
 
+    // Generates points for overlapping tiles
     function getAlignedGrid(w, h, scale) {
         var points = [];
 
@@ -77,6 +78,7 @@
         return points;
     }
 
+    // Generates points for non-overlapping tiling
     function getSpacedGrid(w, h, scale) {
         var points = [];
 
@@ -98,11 +100,13 @@
         return points;
     }
 
+    // Map grid functions to option names
     var gridFunctions = {
         'aligned': getAlignedGrid,
         'spaced': getSpacedGrid
     };
 
+    // Turn constants into functions which return the constant
     function constToFunc(x) {
         if (typeof x !== "function") {
             return function(){return x;}
@@ -136,18 +140,22 @@
         var w = container.offsetWidth;
         var h = container.offsetHeight;
 
+        // get hex spacing function, generate hex points
         var gridFunc = gridFunctions[opts.grid] || getAlignedGrid;
-
         var points = gridFunc(w, h, opts.scale);
 
+        // Find or create canvas child
         var el = container.querySelector('canvas');
+        var newEl = false;
         if (!el) {
             el = document.createElement('canvas');
+            el.width = container.offsetWidth;
+            el.height = container.offsetHeight;
+            newEl = true;
         }
-        el.width = container.offsetWidth;
-        el.height = container.offsetHeight;
         ctx = el.getContext('2d');
 
+        // optional clear
         if (opts.clear) {
             ctx.clearRect(0, 0, w, h);
         }
@@ -155,6 +163,7 @@
         // center point radius
         var r = opts.scale * opts.pointR;
 
+        // draw hexagons
         points.forEach(function(p, i) {
             drawHex(ctx, p[0], p[1], opts.scale,
                 opts.fillColor(opts.palette, i, p[0], p[1], w, h),
@@ -170,7 +179,10 @@
             ctx.closePath();
         });
 
-        container.appendChild(el);
+        // if new canvas child was created, append it
+        if (newEl) {
+            container.appendChild(el);
+        }
     }
 
     // export
