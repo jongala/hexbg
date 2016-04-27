@@ -104,6 +104,7 @@
             fillOpacity: 1,
             strokeOpacity: 1,
             pointOpacity: 1,
+            pointColor: function(palette, i, x, y, w, h) {return "#ffffff"},
             strokeColor: function(palette, i, x, y, w, h) {return "#ffffff"},
             fillColor: function(palette, i, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
@@ -135,7 +136,7 @@
         var r = opts.scale/10;
 
         points.forEach(function(p, i) {
-            ctx.strokeStyle = opts.strokeColor(opts.palette, i, p[0], p[1], w, h);
+            ctx.strokeStyle = opts.pointColor(opts.palette, i, p[0], p[1], w, h);
             ctx.moveTo(p[0], p[1]);
             ctx.globalAlpha = opts.fillOpacity;
             drawHex(ctx, p[0], p[1], opts.scale,
