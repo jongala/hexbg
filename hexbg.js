@@ -79,13 +79,19 @@
         el.height = container.offsetHeight;
         ctx = el.getContext('2d');
 
-        //drawHex(ctx, scale/2, scale/2, scale, randomColor(), 0);
-        //
-
         ctx.strokeStyle = "#000000";
+
+        var r = scale/10;
+
         points.forEach(function(p, i) {
             ctx.globalAlpha = 1;
-            ctx.arc(p[0], p[1], 3, 0, 2*Math.PI, false);
+            ctx.beginPath();
+            ctx.moveTo(p[0] + r, p[1]);
+            ctx.arc(p[0], p[1], r, 0, 2*Math.PI, false);
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.moveTo(p[0], p[1]);
             ctx.globalAlpha = 0.5;
             drawHex(ctx, p[0], p[1], scale, randomColor(), 0);
         });
