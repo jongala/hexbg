@@ -155,6 +155,8 @@
 
         // optional clear
         if (opts.clear) {
+            el.width = container.offsetWidth;
+            el.height = container.offsetHeight;
             ctx.clearRect(0, 0, w, h);
         }
 
