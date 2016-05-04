@@ -45,22 +45,27 @@
         size = size || 256;
 
         var coords = getShapeCoords(x, y, size);
-
-        fillColor = fillColor || "#FF0099";
-        ctx.fillStyle = fillColor;
-        ctx.beginPath();
         var origin = coords.shift();
+
+        ctx.beginPath();
         ctx.moveTo(origin[0], origin[1]);
-        coords.forEach(function(p, i){
+        coords.forEach(function (p, i) {
             ctx.lineTo(p[0], p[1]);
-        })
-        ctx.globalAlpha = fillOpacity;
-        ctx.fill();
+        });
+        ctx.lineTo(origin[0], origin[1]);
+
+        if (fillColor) {
+            ctx.fillStyle = fillColor;
+            ctx.globalAlpha = fillOpacity;
+            ctx.fill();
+        }
+
         if (strokeColor) {
             ctx.strokeStyle = strokeColor;
             ctx.globalAlpha = strokeOpacity;
             ctx.stroke();
         }
+
         ctx.closePath();
 
         return ctx;
@@ -121,7 +126,7 @@
             fillOpacity: 1,
             strokeOpacity: 1,
             pointOpacity: 1,
-            pointColor: function(palette, row, col, x, y, w, h) {return "#ffffff"},
+            pointColor: function(palette, row, col, x, y, w, h) {return null},
             strokeColor: function(palette, row, col, x, y, w, h) {return null},
             fillColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
@@ -163,13 +168,23 @@
         // center point radius
         var pr = opts.scale * opts.pointR;
 
-        // draw hexagons
+        // draw hex fills
         points.forEach(function(r, row) {
             r.forEach(function(p, col) {
                 drawHex(ctx, p[0], p[1], opts.scale,
                     opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.fillOpacity, 0);
+            });
+        });
+
+        // draw hex strokes
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                drawHex(ctx, p[0], p[1], opts.scale,
+                    null,
                     opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
-                    opts.fillOpacity, opts.strokeOpacity);
+                    0, opts.strokeOpacity);
 
                 ctx.strokeStyle = opts.pointColor(opts.palette, row, col, p[0], p[1], w, h);
                 ctx.globalAlpha = opts.pointOpacity;

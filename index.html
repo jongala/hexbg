@@ -22,9 +22,10 @@
 <body>
     <div id="tiled"></div>
     <div class="controls">
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5})">Overlap</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0, pointColor:seeded, pointOpacity: 1, strokeOpacity: 1, strokeColor: seeded})">Seeded overlap</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', clear: false, fillOpacity: 0.1, pointOpacity: 0.2})">Overlap Overlay</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', pointOpacity: 0.5, fillColor: blendPlane,strokeOpacity: 1, strokeColor: blendPlane})">Tiled</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 1, strokeColor: '#ffffff'})">Tiled</button>
     </div>
     <script src="hexbg.js"></script>
     <script type="text/javascript">
@@ -35,6 +36,17 @@
                 Math.floor(190 * (h - y)/h)
             ];
             return 'rgb(' + vals.join(',') + ')';
+        }
+        function stepChars(a, s, i) {
+            if (s[i] < a.length) {
+                return a[s[i]];
+            } else {
+                return stepChars(a, s, i + 1);
+            }
+        }
+        seeded = function(p, row, col, x, y, w, h) {
+            var seed = Math.tan((row + col) + 0.2).toString().replace(/^-?\d\./,'');
+            return stepChars(p, seed, 0);
         }
     </script>
 </body>
