@@ -23,8 +23,9 @@
     <div id="tiled"></div>
     <div class="controls">
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0, pointColor:seeded, pointOpacity: 1, strokeOpacity: 1, strokeColor: seeded})">Seeded overlap</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', clear: false, fillOpacity: 0.1, pointOpacity: 0.2})">Overlap Overlay</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Grid</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 1, strokeColor: '#ffffff'})">Tiled</button>
     </div>
     <script src="hexbg.js"></script>

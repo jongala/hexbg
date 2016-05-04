@@ -72,7 +72,7 @@
     }
 
     // Generates hexagon center-points for overlapping tiles
-    function getOverlapLayout(w, h, scale) {
+    function getGridLayout(w, h, scale) {
         var points = [];
         var hexW = scale * 0.8660;
         var hexH = scale;
@@ -83,6 +83,27 @@
             var r = [];
             for (var col = 0 ; col <= cols ; col++) {
                 r.push([col * hexW, row * hexH]);
+            }
+            points.push(r);
+        }
+
+        return points;
+    }
+
+    // Generates hexagon center-points for overlapping tiles
+    function getOverlapLayout(w, h, scale) {
+        var points = [];
+        var hexW = 2 * scale * 0.8660;
+        var hexH = scale * 0.5;
+        var rows = Math.ceil(h/hexH);
+        var cols = Math.ceil(w/hexW);
+        var offset;
+
+        for (var row = 0 ; row <= rows ; row++) {
+            var r = [];
+            for (var col = 0 ; col <= cols ; col++) {
+                offset = (row % 2)? (- scale * 0.8660 ) : 0;
+                r.push([col * hexW + offset, row * hexH]);
             }
             points.push(r);
         }
@@ -113,6 +134,7 @@
 
     // Map grid functions to option names
     var layoutFunctions = {
+        'grid': getGridLayout,
         'overlap': getOverlapLayout,
         'tile': getTiledLayout
     };
