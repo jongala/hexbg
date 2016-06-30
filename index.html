@@ -27,12 +27,16 @@
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Grid</button>
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
         <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff'})">Tiled</button>
+        |
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Grid SVG</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Overlap SVG</button>
+        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff', renderer:'svg'})">Tiled SVG</button>
     </div>
     <script src="hexbg.js"></script>
     <script type="text/javascript">
         blendPlane = function(p, row, col, x, y, w, h){
             var vals = [
-                Math.floor(255 * (w-x  )/w),
+                Math.floor(255 * (w - x)/w),
                 0,
                 Math.floor(190 * (h - y)/h)
             ];

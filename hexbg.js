@@ -24,6 +24,16 @@
       return (PALETTE[Math.floor(PALETTE.length * Math.random())]);
     }
 
+    function setAttrs(el, attrs) {
+        if (el && el.setAttribute) {
+            for (a in attrs) {
+                if (attrs.hasOwnProperty(a)) {
+                    el.setAttribute(a, attrs[a]);
+                }
+            }
+        }
+    }
+
     // Returns an array of [x, y] points describing a hexagon
     function getShapeCoords(x, y, size, angle) {
         var c = [];
@@ -69,6 +79,39 @@
         ctx.closePath();
 
         return ctx;
+    }
+
+    function drawHexSVG(container, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
+        if (!container) return;
+        size = size || 256;
+        fillColor = fillColor || 'transparent';
+        strokeColor = strokeColor || 'transparent';
+
+        var coords = getShapeCoords(x, y, size);
+        var d = ("M " + coords.join(" L ") + " Z").replace(/,/g, ' ');
+        var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        setAttrs(path, {
+            'd': d,
+            'fill': fillColor,
+            'fill-opacity': fillOpacity,
+            'stroke': strokeColor,
+            'stroke-opacity': strokeOpacity
+        });
+        container.appendChild(path);
+    }
+
+    function drawCircleSVG(container, x, y, r, strokeColor, strokeOpacity) {
+        var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        setAttrs(c, {
+            'cx': x,
+            'cy': y,
+            'r': r,
+            'fill': 'transparent',
+            'stroke': strokeColor,
+            'stroke-opacity': strokeOpacity,
+            'stroke-width': 1
+        });
+        container.appendChild(c);
     }
 
     // Generates hexagon center-points for overlapping tiles
@@ -152,7 +195,8 @@
             strokeColor: function(palette, row, col, x, y, w, h) {return null},
             fillColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
-            clear: true
+            clear: true,
+            renderer: 'canvas' // or 'svg'
         };
         var opts = {};
         opts = extend(extend(opts, defaults), options);
@@ -170,58 +214,106 @@
         var points = layoutFunc(w, h, opts.scale);
 
         // Find or create canvas child
-        var el = container.querySelector('canvas');
+        var el = container.querySelector(opts.renderer);
         var newEl = false;
         if (!el) {
-            el = document.createElement('canvas');
-            el.width = container.offsetWidth;
-            el.height = container.offsetHeight;
+            container.innerHTML = '';
+            if (opts.renderer === 'svg') {
+                el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            } else {
+                el = document.createElement('canvas');
+            }
+            setAttrs(el, {
+                'width': container.offsetWidth,
+                'height': container.offsetHeight
+            });
             newEl = true;
         }
-        ctx = el.getContext('2d');
 
-        // optional clear
-        if (opts.clear) {
-            el.width = container.offsetWidth;
-            el.height = container.offsetHeight;
-            ctx.clearRect(0, 0, w, h);
+        if (opts.renderer === 'canvas') {
+            var ctx = el.getContext('2d');
+
+            // optional clear
+            if (opts.clear) {
+                el.width = container.offsetWidth;
+                el.height = container.offsetHeight;
+                ctx.clearRect(0, 0, w, h);
+            }
+
+            // center point radius
+            var pr = opts.scale * opts.pointR;
+
+            // draw hex fills
+            points.forEach(function(r, row) {
+                r.forEach(function(p, col) {
+                    drawHex(ctx, p[0], p[1], opts.scale,
+                        opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
+                        null,
+                        opts.fillOpacity, 0);
+                });
+            });
+
+            // draw hex strokes
+            points.forEach(function(r, row) {
+                r.forEach(function(p, col) {
+                    drawHex(ctx, p[0], p[1], opts.scale,
+                        null,
+                        opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
+                        0, opts.strokeOpacity);
+
+                    ctx.strokeStyle = opts.pointColor(opts.palette, row, col, p[0], p[1], w, h);
+                    ctx.globalAlpha = opts.pointOpacity;
+                    ctx.beginPath();
+                    ctx.moveTo(p[0] + pr, p[1]);
+                    ctx.arc(p[0], p[1], pr, 0, 2*Math.PI, false);
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+            });
+
+            // if new canvas child was created, append it
+            if (newEl) {
+                container.appendChild(el);
+            }
+        } else if (opts.renderer === 'svg') {
+
+            el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+            if (opts.clear) {
+                el.innerHTML = '';
+            }
+
+            // center point radius
+            var pr = opts.scale * opts.pointR;
+
+            // draw hex fills
+            points.forEach(function(r, row) {
+                r.forEach(function(p, col) {
+                    drawHexSVG(el, p[0], p[1], opts.scale,
+                        opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
+                        null,
+                        opts.fillOpacity, 0);
+                });
+            });
+
+            // draw hex strokes
+            points.forEach(function(r, row) {
+                r.forEach(function(p, col) {
+                    drawHexSVG(el, p[0], p[1], opts.scale,
+                        null,
+                        opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
+                        0, opts.strokeOpacity);
+
+                    drawCircleSVG(el, p[0], p[1], pr, opts.strokeColor(), opts.strokeOpacity);
+                });
+            });
+
+            // if new canvas child was created, append it
+            if (newEl) {
+                container.appendChild(el);
+            }
         }
 
-        // center point radius
-        var pr = opts.scale * opts.pointR;
-
-        // draw hex fills
-        points.forEach(function(r, row) {
-            r.forEach(function(p, col) {
-                drawHex(ctx, p[0], p[1], opts.scale,
-                    opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
-                    null,
-                    opts.fillOpacity, 0);
-            });
-        });
-
-        // draw hex strokes
-        points.forEach(function(r, row) {
-            r.forEach(function(p, col) {
-                drawHex(ctx, p[0], p[1], opts.scale,
-                    null,
-                    opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
-                    0, opts.strokeOpacity);
-
-                ctx.strokeStyle = opts.pointColor(opts.palette, row, col, p[0], p[1], w, h);
-                ctx.globalAlpha = opts.pointOpacity;
-                ctx.beginPath();
-                ctx.moveTo(p[0] + pr, p[1]);
-                ctx.arc(p[0], p[1], pr, 0, 2*Math.PI, false);
-                ctx.stroke();
-                ctx.closePath();
-            });
-        });
-
-        // if new canvas child was created, append it
-        if (newEl) {
-            container.appendChild(el);
-        }
     }
 
     // export
