@@ -50,7 +50,7 @@
     }
 
     // Draw a hexagon into ctx with the passed characteristics
-    function drawHex(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
+    function drawHexCanvas(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
         if (!ctx) return;
         size = size || 256;
 
@@ -98,6 +98,16 @@
             'stroke-opacity': strokeOpacity
         });
         container.appendChild(path);
+    }
+
+    function drawCircleCanvas(ctx, x, y, r, strokeColor, strokeOpacity) {
+        ctx.strokeStyle = strokeColor;
+        ctx.globalAlpha = strokeOpacity;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arc(x, y, r, 0, 2*Math.PI, false);
+        ctx.stroke();
+        ctx.closePath();
     }
 
     function drawCircleSVG(container, x, y, r, strokeColor, strokeOpacity) {
@@ -246,7 +256,7 @@
             // draw hex fills
             points.forEach(function(r, row) {
                 r.forEach(function(p, col) {
-                    drawHex(ctx, p[0], p[1], opts.scale,
+                    drawHexCanvas(ctx, p[0], p[1], opts.scale,
                         opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
                         null,
                         opts.fillOpacity, 0);
@@ -256,18 +266,15 @@
             // draw hex strokes
             points.forEach(function(r, row) {
                 r.forEach(function(p, col) {
-                    drawHex(ctx, p[0], p[1], opts.scale,
+                    drawHexCanvas(ctx, p[0], p[1], opts.scale,
                         null,
                         opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
                         0, opts.strokeOpacity);
 
-                    ctx.strokeStyle = opts.pointColor(opts.palette, row, col, p[0], p[1], w, h);
-                    ctx.globalAlpha = opts.pointOpacity;
-                    ctx.beginPath();
-                    ctx.moveTo(p[0] + pr, p[1]);
-                    ctx.arc(p[0], p[1], pr, 0, 2*Math.PI, false);
-                    ctx.stroke();
-                    ctx.closePath();
+                    drawCircleCanvas(ctx,
+                        p[0], p[1], pr,
+                        opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
+                        opts.pointOpacity);
                 });
             });
 
@@ -304,7 +311,10 @@
                         opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
                         0, opts.strokeOpacity);
 
-                    drawCircleSVG(el, p[0], p[1], pr, opts.strokeColor(), opts.strokeOpacity);
+                    drawCircleSVG(el,
+                        p[0], p[1], pr,
+                        opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
+                        opts.strokeOpacity);
                 });
             });
 
