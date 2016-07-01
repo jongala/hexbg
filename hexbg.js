@@ -240,88 +240,64 @@
             newEl = true;
         }
 
+        var renderCtx; // canvas ctx or svg tag
+        var drawHex;
+        var drawCircle;
+
         if (opts.renderer === 'canvas') {
-            var ctx = el.getContext('2d');
+            renderCtx = el.getContext('2d');
+            drawHex = drawHexCanvas;
+            drawCircle = drawCircleCanvas;
 
             // optional clear
             if (opts.clear) {
                 el.width = container.offsetWidth;
                 el.height = container.offsetHeight;
-                ctx.clearRect(0, 0, w, h);
-            }
-
-            // center point radius
-            var pr = opts.scale * opts.pointR;
-
-            // draw hex fills
-            points.forEach(function(r, row) {
-                r.forEach(function(p, col) {
-                    drawHexCanvas(ctx, p[0], p[1], opts.scale,
-                        opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
-                        null,
-                        opts.fillOpacity, 0);
-                });
-            });
-
-            // draw hex strokes
-            points.forEach(function(r, row) {
-                r.forEach(function(p, col) {
-                    drawHexCanvas(ctx, p[0], p[1], opts.scale,
-                        null,
-                        opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
-                        0, opts.strokeOpacity);
-
-                    drawCircleCanvas(ctx,
-                        p[0], p[1], pr,
-                        opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
-                        opts.pointOpacity);
-                });
-            });
-
-            // if new canvas child was created, append it
-            if (newEl) {
-                container.appendChild(el);
+                renderCtx.clearRect(0, 0, w, h);
             }
         } else if (opts.renderer === 'svg') {
+            renderCtx = el;
+            drawHex = drawHexSVG;
+            drawCircle = drawCircleSVG;
 
             el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
             if (opts.clear) {
                 el.innerHTML = '';
             }
+        }
 
-            // center point radius
-            var pr = opts.scale * opts.pointR;
+        // center point radius
+        var pr = opts.scale * opts.pointR;
 
-            // draw hex fills
-            points.forEach(function(r, row) {
-                r.forEach(function(p, col) {
-                    drawHexSVG(el, p[0], p[1], opts.scale,
-                        opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
-                        null,
-                        opts.fillOpacity, 0);
-                });
+        // draw hex fills
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                drawHex(renderCtx, p[0], p[1], opts.scale,
+                    opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.fillOpacity, 0);
             });
+        });
 
-            // draw hex strokes
-            points.forEach(function(r, row) {
-                r.forEach(function(p, col) {
-                    drawHexSVG(el, p[0], p[1], opts.scale,
-                        null,
-                        opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
-                        0, opts.strokeOpacity);
+        // draw hex strokes
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                drawHex(renderCtx, p[0], p[1], opts.scale,
+                    null,
+                    opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
+                    0, opts.strokeOpacity);
 
-                    drawCircleSVG(el,
-                        p[0], p[1], pr,
-                        opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
-                        opts.strokeOpacity);
-                });
+                drawCircle(renderCtx,
+                    p[0], p[1], pr,
+                    opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
+                    opts.pointOpacity);
             });
+        });
 
-            // if new canvas child was created, append it
-            if (newEl) {
-                container.appendChild(el);
-            }
+        // if new canvas child was created, append it
+        if (newEl) {
+            container.appendChild(el);
         }
 
     }
