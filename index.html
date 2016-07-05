@@ -2,8 +2,8 @@
 <head>
     <title>Hexagons</title>
     <style type="text/css">
-        #tiled,
-        #tiled canvas {
+        #example,
+        #example canvas {
             position: absolute;
             top: 0;
             bottom: 0;
@@ -11,7 +11,7 @@
             right: 0;
         }
 
-        #tiled {}
+        #example {}
 
         .controls {
             position: relative;
@@ -20,19 +20,20 @@
     </style>
 </head>
 <body>
-    <div id="tiled"></div>
+    <div id="example"></div>
     <div class="controls">
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0, pointColor:seeded, pointOpacity: 1, strokeOpacity: 1, strokeColor: seeded})">Seeded overlap</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'overlap', clear: false, fillOpacity: 0.1, pointOpacity: 0.2})">Overlap Overlay</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Grid</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff'})">Tiled</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0, pointColor:seeded, pointOpacity: 1, strokeOpacity: 1, strokeColor: seeded})">Seeded overlap</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'overlap', clear: false, fillOpacity: 0.1, pointOpacity: 0.2})">Overlap Overlay</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Grid</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff'})">Tiled</button>
         |
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Grid SVG</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Overlap SVG</button>
-        <button onclick="hexBg(document.getElementById('tiled'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff', renderer:'svg'})">Tiled SVG</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Grid SVG</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Overlap SVG</button>
+        <button onclick="hexBg(document.getElementById('example'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff', renderer:'svg'})">Tiled SVG</button>
     </div>
     <script src="js/hexbg.js"></script>
+    <script src="3p/DAT.GUI.min.js"></script>
     <script type="text/javascript">
         blendPlane = function(p, row, col, x, y, w, h){
             var vals = [
@@ -53,6 +54,53 @@
             var seed = Math.tan((row + col) + 0.2).toString().replace(/^-?\d\./,'');
             return stepChars(p, seed, 0);
         }
+        var visualOpts = {
+            renderer: 'canvas',
+            layout: 'overlap',
+            scale: 96,
+            pointR: 0.07,
+            fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+            pointOpacity: 1,
+            strokeColor: '#fff',
+            pointColor: '#fff',
+            palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
+            clear: true
+        };
+        var o = visualOpts;
+
+
+        var exampleNode = document.getElementById('example');
+        function renderVisualOpts() {
+            hexBg(exampleNode, visualOpts);
+        }
+        var r = renderVisualOpts;
+
+
+        window.addEventListener('load', function(e){
+            var gui = new DAT.GUI();
+            gui.add(o, 'scale').min(24).max(256).step(1)
+                .onChange(r);
+            gui.add(o, 'fillOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            gui.add(o, 'strokeOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            gui.add(o, 'strokeColor', '#ffffff')
+                .onChange(r);
+
+            gui.add(o, 'pointOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            gui.add(o, 'pointR').min(0).max(1)
+                .onChange(r);
+            gui.add(o, 'pointColor', '#ffffff')
+                .onChange(r);
+
+            gui.add(o, 'layout').options('overlap', 'grid', 'tiled')
+                .onChange(r);
+
+            r();
+        })
+
     </script>
 </body>
 </html>
