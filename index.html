@@ -3,6 +3,9 @@
     <meta charset="utf-8"/>
     <title>Hexagons</title>
     <style type="text/css">
+        body {
+            font-family: sans-serif;
+        }
         #example,
         #example canvas {
             position: absolute;
@@ -20,21 +23,19 @@
             left: 0;
             z-index: 1;
             padding:0.5em;
+            font-size: 13px;
+            color: #fff;
         }
     </style>
 </head>
 <body>
     <div id="example"></div>
     <div class="controls">
-        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'overlap', fillOpacity: 0, pointColor:seeded, pointOpacity: 1, strokeOpacity: 1, strokeColor: seeded})">Seeded overlap</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'overlap', clear: false, fillOpacity: 0.1, pointOpacity: 0.2})">Overlap Overlay</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff'})">Grid</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff'})">Overlap</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff'})">Tiled</button>
-        |
-        <button onclick="hexBg(document.getElementById('example'), {scale: 96, pointR: 0.07,  layout: 'grid', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Grid SVG</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 48, pointR: 0.07,  layout: 'overlap', fillOpacity: 0.5, pointColor:'#ffffff', pointOpacity: 0.2, pointR: 0.15,  strokeOpacity: 0.2, strokeColor: '#ffffff', renderer:'svg'})">Overlap SVG</button>
-        <button onclick="hexBg(document.getElementById('example'), {scale: 48, layout: 'tile', fillColor: blendPlane, pointColor:'#ffffff', pointOpacity: 0.5, strokeOpacity: 0.1, strokeColor: '#ffffff', renderer:'svg'})">Tiled SVG</button>
+        <button onclick="loadOpts(exampleSeeded)">Seeded overlap</button>
+        <!--<button onclick="loadOpts(exampleLayer)">Translucent Layer</button>-->
+        <button onclick="loadOpts(exampleGrid)">Grid</button>
+        <button onclick="loadOpts(exampleOverlap)">Overlap</button>
+        <!--<button onclick="loadOpts(exampleTiled)">Tiled</button>-->
     </div>
     <script src="js/hexbg.js"></script>
     <script src="3p/dat.gui.min.js"></script>
@@ -78,8 +79,20 @@
             return arr;
         }
 
+        function arrayToObj(arr) {
+            var obj = {};
+            arr.forEach(function(val, i){
+                obj[i] = val;
+            });
+            return obj;
+        }
+
+        // Default Palette
+        DEFAULT_PALETTE = ["#ff0099", "#774aa4", "#3399cc", "#ffcc00"];
+
         // pre-packaged opts
         var exampleOverlap = {
+            clear: true,
             scale: 48,
             pointR: 0.07,
             layout: 'overlap',
@@ -88,9 +101,11 @@
             pointOpacity: 0.2,
             pointR: 0.15,
             strokeOpacity: 0.2,
-            strokeColor: '#ffffff'
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
         };
         var exampleGrid = {
+            clear: true,
             scale: 96,
             pointR: 0.07,
             layout: 'grid',
@@ -99,8 +114,10 @@
             pointOpacity: 0.5,
             strokeOpacity: 0.2,
             strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
         };
         var exampleWeb = {
+            clear: true,
             scale: 96,
             pointR: 0.07,
             layout: 'grid',
@@ -108,15 +125,47 @@
             pointColor:'#ffffff',
             pointOpacity: 0.5,
             strokeOpacity: 0.2,
-            strokeColor: '#774aa4'
+            strokeColor: '#774aa4',
+            palette: DEFAULT_PALETTE
         };
 
-        visPalette = {
-            0: '#ff0099',
-            1: '#774aa4',
-            2: '#3399cc',
-            3: '#ffcc00'
+        var exampleLayer = {
+            scale: 96,
+            pointR: 0.07,
+            layout: 'grid',
+            fillOpacity: 0.1,
+            pointColor:'#ffffff',
+            pointOpacity: 0.2,
+            strokeOpacity: 0.2,
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
+        }
+
+        var exampleTiled = {
+            scale: 48,
+            layout: 'tile',
+            fillColor: blendPlane,
+            fillOpacity: 1,
+            pointColor:'#ffffff',
+            pointOpacity: 0.5,
+            strokeOpacity: 0.1,
+            strokeColor: '#ffffff',
+            renderer:'svg'
         };
+
+        var exampleSeeded = {
+            scale: 96,
+            pointR: 0.07,
+            layout: 'overlap',
+            fillOpacity: 0,
+            pointColor: seeded,
+            pointOpacity: 1,
+            strokeOpacity: 1,
+            strokeColor: seeded,
+            palette: DEFAULT_PALETTE
+        }
+
+        visPalette = arrayToObj(DEFAULT_PALETTE);
 
         // GUI controlled opts
         var visualOpts = {
@@ -170,6 +219,7 @@
 
             gui.add(o, 'renderer').options('canvas', 'svg')
                 .onChange(r);
+            //gui.add(o, 'clear').onChange(r);
 
             var core = gui.addFolder('Basics');
             core.open();
@@ -197,7 +247,7 @@
             centers.add(o, 'pointOpacity').min(0).max(1).step(0.1)
                 .onChange(r);
             centers.add(o, 'pointR').min(0).max(1)
-                .name('pointColoradius')
+                .name('pointRadius')
                 .onChange(r);
             centers.addColor(o, 'pointColor')
                 .onChange(r);
