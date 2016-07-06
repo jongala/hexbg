@@ -98,7 +98,7 @@
             pointColor:'#ffffff',
             pointOpacity: 0.5,
             strokeOpacity: 0.2,
-            strokeColor: '#ffffff'
+            strokeColor: '#ffffff',
         };
         var exampleWeb = {
             scale: 96,
@@ -163,9 +163,10 @@
 
         // convenient way to expose a redraw button
         var util = {redraw: r}
+        var gui;
 
         window.addEventListener('load', function(e){
-            var gui = new dat.GUI();
+            gui = new dat.GUI();
 
             gui.add(o, 'renderer').options('canvas', 'svg')
                 .onChange(r);
@@ -205,6 +206,7 @@
             gui.add(util, 'redraw').name('Redraw →');
 
             gui.open(); // resizes the controls
+
             r(); // draws initial values
         });
 
