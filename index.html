@@ -35,6 +35,7 @@
         <!--<button onclick="loadOpts(exampleLayer)">Translucent Layer</button>-->
         <button onclick="loadOpts(exampleGrid)">Grid</button>
         <button onclick="loadOpts(exampleOverlap)">Overlap</button>
+        <button onclick="loadOpts(exampleScatter)">Overlap Scatter</button>
         <!--<button onclick="loadOpts(exampleTiled)">Tiled</button>-->
     </div>
     <script src="js/hexbg.js"></script>
@@ -59,6 +60,17 @@
         seeded = function(p, row, col, x, y, w, h) {
             var seed = Math.tan((row + col) + 0.2).toString().replace(/^-?\d\./,'');
             return stepChars(p, seed, 0);
+        }
+
+        scatter = function(p, row, col, x, y, w, h) {
+            var c = w/2; // center ref
+            var xd = Math.abs(x-c) / c; // normalized distance from center
+            if (xd > Math.random()) {
+                return '#fff';
+            } else {
+                return p.sort(function(){return 0.5-Math.random()})[0];
+            }
+
         }
 
         // Obj/array helpers
@@ -93,6 +105,21 @@
 
         // Default Palette
         DEFAULT_PALETTE = ["#ff0099", "#774aa4", "#3399cc", "#ffcc00"];
+
+        var exampleScatter = {
+            clear: true,
+            scale: 48,
+            pointR: 0.07,
+            layout: 'overlap',
+            fillColor: scatter,
+            fillOpacity: 0.5,
+            pointColor:'#ffffff',
+            pointOpacity: 0.2,
+            pointR: 0.15,
+            strokeOpacity: 0.2,
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
+        };
 
         // pre-packaged opts
         var exampleOverlap = {
