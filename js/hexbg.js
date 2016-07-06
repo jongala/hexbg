@@ -233,11 +233,13 @@
             } else {
                 el = document.createElement('canvas');
             }
+            newEl = true;
+        }
+        if (newEl || opts.clear) {
             setAttrs(el, {
                 'width': container.offsetWidth,
                 'height': container.offsetHeight
             });
-            newEl = true;
         }
 
         var renderCtx; // canvas ctx or svg tag
