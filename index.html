@@ -136,18 +136,19 @@
 
         var exampleNode = document.getElementById('example');
 
-        function renderVisualOpts() {
-            //if (!visualOpts.hasOwnProperty('palette')) {
-                visualOpts.palette = objToArray(visPalette);
-            //}
-            hexBg(exampleNode, visualOpts);
+        function renderOpts(opts) {
+            hexBg(exampleNode, opts);
         }
-        var r = renderVisualOpts;
+
+        // shorthand
+        var r = function(){
+            visualOpts.palette = objToArray(visPalette);
+            renderOpts(visualOpts);
+        };
 
         function loadOpts(opts) {
             visualOpts = extend(visualOpts, opts);
-
-            renderVisualOpts();
+            renderOpts(visualOpts);
         }
 
         function paletteToControls(palette, folder) {
@@ -161,7 +162,7 @@
         }
 
         // convenient way to expose a redraw button
-        var util = {redraw: renderVisualOpts}
+        var util = {redraw: r}
 
         window.addEventListener('load', function(e){
             var gui = new dat.GUI();
