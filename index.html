@@ -40,6 +40,7 @@
     <script src="js/hexbg.js"></script>
     <script src="3p/dat.gui.min.js"></script>
     <script type="text/javascript">
+        // Color function helpers
         blendPlane = function(p, row, col, x, y, w, h){
             var vals = [
                 Math.floor(255 * (w - x)/w),
@@ -60,6 +61,7 @@
             return stepChars(p, seed, 0);
         }
 
+        // Obj/array helpers
         function extend(dest, src) {
             for (k in src) {
                 if (src.hasOwnProperty(k)) {
@@ -87,6 +89,8 @@
             return obj;
         }
 
+        // Examples and controls
+
         // Default Palette
         DEFAULT_PALETTE = ["#ff0099", "#774aa4", "#3399cc", "#ffcc00"];
 
@@ -104,6 +108,7 @@
             strokeColor: '#ffffff',
             palette: DEFAULT_PALETTE
         };
+
         var exampleGrid = {
             clear: true,
             scale: 96,
@@ -116,6 +121,7 @@
             strokeColor: '#ffffff',
             palette: DEFAULT_PALETTE
         };
+
         var exampleWeb = {
             clear: true,
             scale: 96,
@@ -139,7 +145,7 @@
             strokeOpacity: 0.2,
             strokeColor: '#ffffff',
             palette: DEFAULT_PALETTE
-        }
+        };
 
         var exampleTiled = {
             scale: 48,
@@ -163,8 +169,10 @@
             strokeOpacity: 1,
             strokeColor: seeded,
             palette: DEFAULT_PALETTE
-        }
+        };
 
+
+        // GUI controlled colors
         visPalette = arrayToObj(DEFAULT_PALETTE);
 
         // GUI controlled opts
