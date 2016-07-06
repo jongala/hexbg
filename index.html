@@ -1,5 +1,6 @@
 <html>
 <head>
+    <meta charset="utf-8"/>
     <title>Hexagons</title>
     <style type="text/css">
         #example,
@@ -14,8 +15,11 @@
         #example {}
 
         .controls {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             z-index: 1;
+            padding:0.5em;
         }
     </style>
 </head>
@@ -64,6 +68,16 @@
             return dest;
         }
 
+        function objToArray(obj) {
+            var arr = [];
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    arr.push(obj[key]);
+                }
+            }
+            return arr;
+        }
+
         // pre-packaged opts
         var exampleOverlap = {
             scale: 48,
@@ -97,18 +111,24 @@
             strokeColor: '#774aa4'
         };
 
+        visPalette = {
+            0: '#ff0099',
+            1: '#774aa4',
+            2: '#3399cc',
+            3: '#ffcc00'
+        };
+
         // GUI controlled opts
         var visualOpts = {
             renderer: 'canvas',
             layout: 'overlap',
             scale: 96,
-            pointR: 0.07,
+            pointR: 0.125,
             fillOpacity: 0.5,
             strokeOpacity: 0.5,
             pointOpacity: 1,
             strokeColor: '#fff',
             pointColor: '#fff',
-            palette: ['#3399cc', '#774aa4', '#ff0099', '#ffcc00'],
             clear: true
         };
         var o = visualOpts;
@@ -117,15 +137,31 @@
         var exampleNode = document.getElementById('example');
 
         function renderVisualOpts() {
+            //if (!visualOpts.hasOwnProperty('palette')) {
+                visualOpts.palette = objToArray(visPalette);
+            //}
             hexBg(exampleNode, visualOpts);
         }
         var r = renderVisualOpts;
 
         function loadOpts(opts) {
             visualOpts = extend(visualOpts, opts);
+
             renderVisualOpts();
         }
 
+        function paletteToControls(palette, folder) {
+            for (c in palette) {
+                if (palette.hasOwnProperty(c)) {
+                    folder.addColor(palette, c)
+                        .onChange(r);
+                }
+            }
+            return folder;
+        }
+
+        // convenient way to expose a redraw button
+        var util = {redraw: renderVisualOpts}
 
         window.addEventListener('load', function(e){
             var gui = new dat.GUI();
@@ -145,6 +181,8 @@
             polys.add(o, 'fillOpacity').min(0).max(1).step(0.1)
                 .onChange(r);
 
+            paletteToControls(visPalette, polys);
+
             var edges = gui.addFolder('Edges');
             edges.open();
             edges.add(o, 'strokeOpacity').min(0).max(1).step(0.1)
@@ -161,6 +199,9 @@
                 .onChange(r);
             centers.addColor(o, 'pointColor')
                 .onChange(r);
+
+
+            gui.add(util, 'redraw').name('Redraw →');
 
             gui.open(); // resizes the controls
             r(); // draws initial values
