@@ -198,6 +198,15 @@
         function loadOpts(opts) {
             visualOpts = extend(visualOpts, opts);
             renderOpts(visualOpts);
+
+            // Update the visual controls
+            gui.__controllers.forEach(function(c){c.updateDisplay()});
+            var folders = gui.__folders;
+            for (key in folders) {
+                if (folders.hasOwnProperty(key)) {
+                    folders[key].__controllers.forEach(function(c){c.updateDisplay()});
+                }
+            }
         }
 
         function paletteToControls(palette, folder) {
