@@ -84,8 +84,8 @@
     function drawHexSVG(container, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
         if (!container) return;
         size = size || 256;
-        fillColor = fillColor || 'transparent';
-        strokeColor = strokeColor || 'transparent';
+        fillColor = fillColor || 'none';
+        strokeColor = strokeColor || 'none';
 
         var coords = getShapeCoords(x, y, size);
         var d = ("M " + coords.join(" L ") + " Z").replace(/,/g, ' ');
@@ -116,7 +116,7 @@
             'cx': x,
             'cy': y,
             'r': r,
-            'fill': 'transparent',
+            'fill': 'none',
             'stroke': strokeColor,
             'stroke-opacity': strokeOpacity,
             'stroke-width': 1
