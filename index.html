@@ -1,0 +1,282 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Hexagons</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+        }
+        #example,
+        #example canvas {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #example {}
+
+        .controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            padding:0.5em;
+            font-size: 13px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="example"></div>
+    <div class="controls">
+        <button onclick="loadOpts(exampleSeeded)">Seeded overlap</button>
+        <!--<button onclick="loadOpts(exampleLayer)">Translucent Layer</button>-->
+        <button onclick="loadOpts(exampleGrid)">Grid</button>
+        <button onclick="loadOpts(exampleOverlap)">Overlap</button>
+        <!--<button onclick="loadOpts(exampleTiled)">Tiled</button>-->
+    </div>
+    <script src="js/hexbg.js"></script>
+    <script src="3p/dat.gui.min.js"></script>
+    <script type="text/javascript">
+        // Color function helpers
+        blendPlane = function(p, row, col, x, y, w, h){
+            var vals = [
+                Math.floor(255 * (w - x)/w),
+                0,
+                Math.floor(190 * (h - y)/h)
+            ];
+            return 'rgb(' + vals.join(',') + ')';
+        }
+        function stepChars(a, s, i) {
+            if (s[i] < a.length) {
+                return a[s[i]];
+            } else {
+                return stepChars(a, s, i + 1);
+            }
+        }
+        seeded = function(p, row, col, x, y, w, h) {
+            var seed = Math.tan((row + col) + 0.2).toString().replace(/^-?\d\./,'');
+            return stepChars(p, seed, 0);
+        }
+
+        // Obj/array helpers
+        function extend(dest, src) {
+            for (k in src) {
+                if (src.hasOwnProperty(k)) {
+                    dest[k] = src[k];
+                }
+            }
+            return dest;
+        }
+
+        function objToArray(obj) {
+            var arr = [];
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    arr.push(obj[key]);
+                }
+            }
+            return arr;
+        }
+
+        function arrayToObj(arr) {
+            var obj = {};
+            arr.forEach(function(val, i){
+                obj[i] = val;
+            });
+            return obj;
+        }
+
+        // Examples and controls
+
+        // Default Palette
+        DEFAULT_PALETTE = ["#ff0099", "#774aa4", "#3399cc", "#ffcc00"];
+
+        // pre-packaged opts
+        var exampleOverlap = {
+            clear: true,
+            scale: 48,
+            pointR: 0.07,
+            layout: 'overlap',
+            fillOpacity: 0.5,
+            pointColor:'#ffffff',
+            pointOpacity: 0.2,
+            pointR: 0.15,
+            strokeOpacity: 0.2,
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
+        };
+
+        var exampleGrid = {
+            clear: true,
+            scale: 96,
+            pointR: 0.07,
+            layout: 'grid',
+            fillOpacity: 0.5,
+            pointColor:'#ffffff',
+            pointOpacity: 0.5,
+            strokeOpacity: 0.2,
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
+        };
+
+        var exampleWeb = {
+            clear: true,
+            scale: 96,
+            pointR: 0.07,
+            layout: 'grid',
+            fillOpacity: 0,
+            pointColor:'#ffffff',
+            pointOpacity: 0.5,
+            strokeOpacity: 0.2,
+            strokeColor: '#774aa4',
+            palette: DEFAULT_PALETTE
+        };
+
+        var exampleLayer = {
+            scale: 96,
+            pointR: 0.07,
+            layout: 'grid',
+            fillOpacity: 0.1,
+            pointColor:'#ffffff',
+            pointOpacity: 0.2,
+            strokeOpacity: 0.2,
+            strokeColor: '#ffffff',
+            palette: DEFAULT_PALETTE
+        };
+
+        var exampleTiled = {
+            scale: 48,
+            layout: 'tile',
+            fillColor: blendPlane,
+            fillOpacity: 1,
+            pointColor:'#ffffff',
+            pointOpacity: 0.5,
+            strokeOpacity: 0.1,
+            strokeColor: '#ffffff',
+            renderer:'svg'
+        };
+
+        var exampleSeeded = {
+            scale: 96,
+            pointR: 0.07,
+            layout: 'overlap',
+            fillOpacity: 0,
+            pointColor: seeded,
+            pointOpacity: 1,
+            strokeOpacity: 1,
+            strokeColor: seeded,
+            palette: DEFAULT_PALETTE
+        };
+
+
+        // GUI controlled colors
+        visPalette = arrayToObj(DEFAULT_PALETTE);
+
+        // GUI controlled opts
+        var visualOpts = {
+            renderer: 'canvas',
+            layout: 'overlap',
+            scale: 96,
+            pointR: 0.125,
+            fillOpacity: 0.5,
+            strokeOpacity: 0.5,
+            pointOpacity: 1,
+            strokeColor: '#fff',
+            pointColor: '#fff',
+            clear: true
+        };
+        var o = visualOpts;
+
+
+        var exampleNode = document.getElementById('example');
+
+        function renderOpts(opts) {
+            hexBg(exampleNode, opts);
+        }
+
+        // shorthand
+        var r = function(){
+            visualOpts.palette = objToArray(visPalette);
+            renderOpts(visualOpts);
+        };
+
+        function loadOpts(opts) {
+            visualOpts = extend(visualOpts, opts);
+            renderOpts(visualOpts);
+
+            // Update the visual controls
+            gui.__controllers.forEach(function(c){c.updateDisplay()});
+            var folders = gui.__folders;
+            for (key in folders) {
+                if (folders.hasOwnProperty(key)) {
+                    folders[key].__controllers.forEach(function(c){c.updateDisplay()});
+                }
+            }
+        }
+
+        function paletteToControls(palette, folder) {
+            for (c in palette) {
+                if (palette.hasOwnProperty(c)) {
+                    folder.addColor(palette, c)
+                        .onChange(r);
+                }
+            }
+            return folder;
+        }
+
+        // convenient way to expose a redraw button
+        var util = {redraw: r}
+        var gui;
+
+        window.addEventListener('load', function(e){
+            gui = new dat.GUI();
+
+            gui.add(o, 'renderer').options('canvas', 'svg')
+                .onChange(r);
+            //gui.add(o, 'clear').onChange(r);
+
+            var core = gui.addFolder('Basics');
+            core.open();
+            core.add(o, 'layout').options('overlap', 'grid', 'tiled')
+                    .onChange(r);
+            core.add(o, 'scale').min(24).max(256).step(1)
+                .onChange(r);
+
+            var polys = gui.addFolder('Polys');
+            polys.open();
+            polys.add(o, 'fillOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+
+            paletteToControls(visPalette, polys);
+
+            var edges = gui.addFolder('Edges');
+            edges.open();
+            edges.add(o, 'strokeOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            edges.addColor(o, 'strokeColor')
+                .onChange(r);
+
+            var centers = gui.addFolder('Centers');
+            centers.open();
+            centers.add(o, 'pointOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            centers.add(o, 'pointR').min(0).max(1)
+                .name('pointRadius')
+                .onChange(r);
+            centers.addColor(o, 'pointColor')
+                .onChange(r);
+
+
+            gui.add(util, 'redraw').name('Redraw →');
+
+            gui.open(); // resizes the controls
+
+            r(); // draws initial values
+        });
+
+    </script>
+</body>
+</html>
