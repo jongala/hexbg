@@ -376,30 +376,39 @@
             });
         }
 
-        var renderCtx; // canvas ctx or svg tag
         var bgCtx;
         var fgCtx;
         var drawHex;
 
         if (opts.renderer === 'canvas') {
-            renderCtx = el.getContext('2d');
+            bgCtx = el.getContext('2d');
+            fgCtx = bgCtx;
             drawHex = drawHexCanvas;
 
             // optional clear
             if (opts.clear) {
                 el.width = container.offsetWidth;
                 el.height = container.offsetHeight;
-                renderCtx.clearRect(0, 0, w, h);
+                bgCtx.clearRect(0, 0, w, h);
             }
         } else if (opts.renderer === 'svg') {
-            renderCtx = el;
-            drawHex = drawHexSVG;
+            el.setAttribute('xmlns', SVG_NS);
 
-            el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-
-            if (opts.clear) {
+            if (opts.clear || newEl) {
                 el.innerHTML = '';
+                bgCtx = document.createElementNS(SVG_NS, 'g');
+                bgCtx.setAttribute('id', 'background');
+                fgCtx = document.createElementNS(SVG_NS, 'g');
+                fgCtx.setAttribute('id', 'foreground');
+                el.appendChild(bgCtx);
+                el.appendChild(fgCtx);
+            } else {
+                bgCtx = el.getElementById('background');
+                fgCtx = el.getElementById('foreground');
             }
+
+            drawHex = drawHexSVG;
+            drawCircle = drawCircleSVG;
         }
 
         // center point radius
@@ -410,13 +419,13 @@
         points.forEach(function(r, row) {
             r.forEach(function(p, col) {
                 fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
-                drawHex(renderCtx, p[0], p[1], fillSize,
+                drawHex(bgCtx, p[0], p[1], fillSize,
                     opts.bgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
                     opts.bgOpacity, 0, 0);
 
                 fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
-                drawHex(renderCtx, p[0], p[1], fillSize,
+                drawHex(fgCtx, p[0], p[1], fillSize,
                     opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
                     opts.fgOpacity, 0, 30);
