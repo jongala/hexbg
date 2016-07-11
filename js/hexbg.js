@@ -1,4 +1,6 @@
 (function(){
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+
     // simple object extender
     function extend(dest, src) {
         for (k in src) {
@@ -229,7 +231,7 @@
         if (!el) {
             container.innerHTML = '';
             if (opts.renderer === 'svg') {
-                el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                el = document.createElementNS(SVG_NS, 'svg');
             } else {
                 el = document.createElement('canvas');
             }
@@ -242,12 +244,16 @@
             });
         }
 
-        var renderCtx; // canvas ctx or svg tag
+        var fillCtx; // canvas ctx or svg tag
+        var strokeCtx;
+        var circleCtx;
         var drawHex;
         var drawCircle;
 
         if (opts.renderer === 'canvas') {
-            renderCtx = el.getContext('2d');
+            fillCtx = el.getContext('2d');
+            strokeCtx = fillCtx;
+            circleCtx = fillCtx;
             drawHex = drawHexCanvas;
             drawCircle = drawCircleCanvas;
 
@@ -255,18 +261,30 @@
             if (opts.clear) {
                 el.width = container.offsetWidth;
                 el.height = container.offsetHeight;
-                renderCtx.clearRect(0, 0, w, h);
+                fillCtx.clearRect(0, 0, w, h);
             }
         } else if (opts.renderer === 'svg') {
-            renderCtx = el;
+            el.setAttribute('xmlns', SVG_NS);
+
+            if (opts.clear || newEl) {
+                el.innerHTML = '';
+                fillCtx = document.createElementNS(SVG_NS, 'g');
+                fillCtx.setAttribute('id', 'fills');
+                strokeCtx = document.createElementNS(SVG_NS, 'g');
+                strokeCtx.setAttribute('id', 'strokes');
+                circleCtx = document.createElementNS(SVG_NS, 'g');
+                circleCtx.setAttribute('id', 'circles');
+                el.appendChild(fillCtx);
+                el.appendChild(strokeCtx);
+                el.appendChild(circleCtx);
+            } else {
+                fillCtx = el.getElementById('fills');
+                strokeCtx = el.getElementById('strokes');
+                circleCtx = el.getElementById('circles');
+            }
+
             drawHex = drawHexSVG;
             drawCircle = drawCircleSVG;
-
-            el.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-
-            if (opts.clear) {
-                el.innerHTML = '';
-            }
         }
 
         // center point radius
@@ -275,7 +293,7 @@
         // draw hex fills
         points.forEach(function(r, row) {
             r.forEach(function(p, col) {
-                drawHex(renderCtx, p[0], p[1], opts.scale,
+                drawHex(fillCtx, p[0], p[1], opts.scale,
                     opts.fillColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
                     opts.fillOpacity, 0);
@@ -285,12 +303,12 @@
         // draw hex strokes
         points.forEach(function(r, row) {
             r.forEach(function(p, col) {
-                drawHex(renderCtx, p[0], p[1], opts.scale,
+                drawHex(strokeCtx, p[0], p[1], opts.scale,
                     null,
                     opts.strokeColor(opts.palette, row, col, p[0], p[1], w, h),
                     0, opts.strokeOpacity);
 
-                drawCircle(renderCtx,
+                drawCircle(circleCtx,
                     p[0], p[1], pr,
                     opts.pointColor(opts.palette, row, col, p[0], p[1], w, h),
                     opts.pointOpacity);
