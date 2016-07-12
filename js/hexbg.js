@@ -597,8 +597,8 @@
     function bighex(container, options) {
         var defaults = {
             scale: 256,
-            minFill: 0,
-            maxFill: 1,
+            minScale: 0,
+            maxScale: 1,
             bgOpacity: 1,
             fgOpacity: 0.5,
             bgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
@@ -694,15 +694,11 @@
         while (big) {
             big--;
 
-            bigSize = Math.min(w,h) * randomInRange(0.2, 1);
+            bigSize = Math.min(w,h) * randomInRange(opts.minScale, opts.maxScale);
             bigAngle = randomInRange(0, 60);
 
-            // place hexagons on right side, with bigger hex toward the end
-            bigx = w/2 * randomInRange(0, 1 - (bigSize * 2/w));
-            if (Math.random() < 0.5) {
-                bigx = w - bigx;
-            }
-            // place small hex near center, bigger near top/bottom
+            bigx = randomInRange(0, w);
+            // place small hex near centerline, bigger near top/bottom
             bigy = h/2 * randomInRange(0, 1 - (bigSize/h));
             if (Math.random() < 0.5) {
                 bigy = h - bigy;

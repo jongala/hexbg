@@ -64,8 +64,8 @@
         var visualOpts = {
             renderer: 'svg',
             scale: 48,
-            minFill: 0.1,
-            maxFill: 0.4,
+            minScale: 0.1,
+            maxScale: 0.8,
             bgOpacity: 1,
             fgOpacity: 0.5,
         };
@@ -123,9 +123,9 @@
             core.open();
             core.add(o, 'scale').min(16).max(256).step(1)
                 .onChange(r);
-            core.add(o, 'minFill').min(0).max(1).step(0.1)
+            core.add(o, 'minScale').min(0).max(1).step(0.1)
                 .onChange(r);
-            core.add(o, 'maxFill').min(0).max(1).step(0.1)
+            core.add(o, 'maxScale').min(0).max(1).step(0.1)
                 .onChange(r);
 
             var polys = gui.addFolder('Polys');
