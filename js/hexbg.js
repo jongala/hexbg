@@ -428,9 +428,160 @@
                 drawHex(fgCtx, p[0], p[1], fillSize,
                     opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
-                    opts.fgOpacity, 0, 30);
+                    opts.fgOpacity, 0, angle);
             });
         });
+
+
+        // if new canvas child was created, append it
+        if (newEl) {
+            container.appendChild(el);
+        }
+
+    }
+
+    // Tile the container
+    // mix-blend-mode: color-dodge
+    function halfhex(container, options) {
+        var defaults = {
+            scale: 256,
+            layout: 'tile', // [tile, overlap]
+            minFill: 0,
+            maxFill: 1,
+            bgOpacity: 1,
+            fgOpacity: 0.5,
+            bgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
+            fgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
+            palette: ['#3399cc', '#ff0099'],
+            clear: true,
+            renderer: 'svg' // or 'svg'
+        };
+        var opts = {};
+        opts = extend(extend(opts, defaults), options);
+
+        // convert color constants to functions
+        opts.bgColor = constToFunc(opts.bgColor);
+        opts.fgColor = constToFunc(opts.fgColor);
+
+        var w = container.offsetWidth;
+        var h = container.offsetHeight;
+
+        // get hex layout function, generate hex points
+        var layoutFunc = layoutFunctions[opts.layout] || getTiledLayout;
+        var points = layoutFunc(w, h, opts.scale);
+
+        // Find or create canvas child
+        var el = container.querySelector(opts.renderer);
+        var newEl = false;
+        if (!el) {
+            container.innerHTML = '';
+            if (opts.renderer === 'svg') {
+                el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            } else {
+                el = document.createElement('canvas');
+            }
+            newEl = true;
+        }
+        if (newEl || opts.clear) {
+            setAttrs(el, {
+                'width': container.offsetWidth,
+                'height': container.offsetHeight
+            });
+        }
+
+        var bgCtx;
+        var fgCtx;
+        var drawHex;
+
+        if (opts.renderer === 'canvas') {
+            bgCtx = el.getContext('2d');
+            fgCtx = bgCtx;
+            drawHex = drawHexCanvas;
+
+            // optional clear
+            if (opts.clear) {
+                el.width = container.offsetWidth;
+                el.height = container.offsetHeight;
+                bgCtx.clearRect(0, 0, w, h);
+            }
+        } else if (opts.renderer === 'svg') {
+            el.setAttribute('xmlns', SVG_NS);
+
+            if (opts.clear || newEl) {
+                el.innerHTML = '';
+                bgCtx = document.createElementNS(SVG_NS, 'g');
+                bgCtx.setAttribute('id', 'background');
+                fgCtx = document.createElementNS(SVG_NS, 'g');
+                fgCtx.setAttribute('id', 'foreground');
+                el.appendChild(bgCtx);
+                el.appendChild(fgCtx);
+            } else {
+                bgCtx = el.getElementById('background');
+                fgCtx = el.getElementById('foreground');
+            }
+
+            drawHex = drawHexSVG;
+            drawCircle = drawCircleSVG;
+        }
+
+        // center point radius
+        var pr = opts.scale * opts.pointR;
+        var fillSize;
+        var angle;
+
+        // draw fills
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
+                drawHex(bgCtx, p[0], p[1], fillSize,
+                    opts.bgColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.bgOpacity, 0, 0);
+
+                fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
+                angle = 30;
+                /*if ( Math.random() > (0.90 + (1 - col/r.length)/10 ) ) {
+                    fillSize = opts.scale * randomInRange(6, 24) * col/r.length;
+                    angle = 60 * Math.random();
+                }*/
+                drawHex(fgCtx, p[0], p[1], fillSize,
+                    opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.fgOpacity, 0, angle);
+            });
+        });
+
+        var big = Math.floor(randomInRange(4, 8));
+        var bigx;
+        var bigy;
+        var bigSize;
+        var bigAngle;
+        console.log("\n---------------------");
+        while (big) {
+            big--;
+
+            bigSize = Math.min(w,h) * randomInRange(0.2, 1);
+
+            bigAngle = randomInRange(0, 60);
+
+            bigx = w * randomInRange(0.5, 1);
+            bigy = h * randomInRange(0, 0.5);
+
+            if (Math.random() < 0.5) {
+                bigy += h/2;
+            }
+
+            console.log('w',bigx/w);
+            console.log('h',bigy/h);
+
+            drawHex(fgCtx, bigx, bigy, bigSize,
+                opts.fgColor(opts.palette, 0, 0, bigx, bigy, w, h),
+                null, // strokeColor
+                opts.fgOpacity,
+                0, // strokeOpacity
+                bigAngle
+                );
+        }
 
 
         // if new canvas child was created, append it
@@ -443,4 +594,5 @@
     // export
     window.hexBg = hexBg;
     window.halftone = halftone;
+    window.halfhex = halfhex;
 }());

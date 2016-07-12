@@ -31,11 +31,6 @@
 <body>
     <div id="example"></div>
     <div class="controls">
-        <button onclick="loadOpts(exampleSeeded)">Seeded overlap</button>
-        <!--<button onclick="loadOpts(exampleLayer)">Translucent Layer</button>-->
-        <button onclick="loadOpts(exampleGrid)">Grid</button>
-        <button onclick="loadOpts(exampleOverlap)">Overlap</button>
-        <!--<button onclick="loadOpts(exampleTiled)">Tiled</button>-->
     </div>
     <script src="js/hexbg.js"></script>
     <script src="3p/DAT.GUI.min.js"></script>
@@ -59,19 +54,19 @@
         }
 
         // Default Palette
-        DEFAULT_PALETTE = ["#ff0099", "#3399cc"];
+        DEFAULT_PALETTE = ["#ff0099", "#3399cc", "#774aa4", "#ffcc00"];
 
        // GUI controlled colors
         visPalette = arrayToObj(DEFAULT_PALETTE);
 
         // GUI controlled opts
         var visualOpts = {
-            renderer: 'canvas',
+            renderer: 'svg',
             scale: 48,
-            minFill: 0.2,
-            maxFill: 0.9,
+            minFill: 0.1,
+            maxFill: 0.4,
             bgOpacity: 1,
-            fgOpacity: 0.66,
+            fgOpacity: 0.5,
         };
         var o = visualOpts;
 
@@ -79,7 +74,7 @@
         var exampleNode = document.getElementById('example');
 
         function renderOpts(opts) {
-            halftone(exampleNode, opts);
+            halfhex(exampleNode, opts);
         }
 
         // shorthand
