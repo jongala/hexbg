@@ -423,13 +423,13 @@
                 drawHex(bgCtx, p[0], p[1], fillSize,
                     opts.bgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
-                    opts.bgOpacity, 0, 0);
+                    opts.bgOpacity, 0, 0, {'style': 'mix-blend-mode: multiply'});
 
                 fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
                 drawHex(fgCtx, p[0], p[1], fillSize,
                     opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
-                    opts.fgOpacity, 0, angle);
+                    opts.fgOpacity, 0, 30, {'style': 'mix-blend-mode: multiply'});
             });
         });
 
