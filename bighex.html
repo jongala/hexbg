@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>Halfhex</title>
+    <title>Bighex</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -55,6 +55,7 @@
 
         // Default Palette
         DEFAULT_PALETTE = ["#ff0099", "#3399cc", "#774aa4", "#ffcc00"];
+        DEFAULT_PALETTE = ["#ff3eb1", "#50c4ff", "#774aa4", "#fffe00"];
 
        // GUI controlled colors
         visPalette = arrayToObj(DEFAULT_PALETTE);
@@ -74,7 +75,7 @@
         var exampleNode = document.getElementById('example');
 
         function renderOpts(opts) {
-            halfhex(exampleNode, opts);
+            bighex(exampleNode, opts);
         }
 
         // shorthand
