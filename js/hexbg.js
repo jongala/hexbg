@@ -429,7 +429,7 @@
                 drawHex(fgCtx, p[0], p[1], fillSize,
                     opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
                     null,
-                    opts.fgOpacity, 0, 30, {'style': 'mix-blend-mode: multiply'});
+                    opts.fgOpacity, 0, Math.PI/6, {'style': 'mix-blend-mode: multiply'});
             });
         });
 
@@ -575,7 +575,7 @@
             drawHex(bigCtx, bigx, bigy, bigSize,
                 opts.fgColor(opts.palette, 0, 0, bigx, bigy, w, h),
                 null, // strokeColor
-                1,
+                opts.fgOpacity,
                 0, // strokeOpacity
                 bigAngle,
                 {

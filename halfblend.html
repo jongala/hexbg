@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>Bighex</title>
+    <title>Halfhex</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -54,22 +54,26 @@
         }
 
         // Default Palette
-        // dd
         DEFAULT_PALETTE = ["#ff0099", "#3399cc", "#774aa4", "#ffcc00"];
-        // warm
-        DEFAULT_PALETTE = ["#ff5a28", "#ff9500", "#ffe100", "#fcf9d6"];
+
+        factorPalette = {target: '#774aa4', seed:'#7ac0e3'};
+
 
        // GUI controlled colors
         visPalette = arrayToObj(DEFAULT_PALETTE);
 
+        function printFactors() {
+            console.log(factorPalette.target, factorPalette.seed, toHex(getFactor(factorPalette.target, factorPalette.seed)))
+        }
+
         // GUI controlled opts
         var visualOpts = {
             renderer: 'svg',
-            scale: 48,
-            minScale: 0.3,
-            maxScale: 1.2,
+            scale: 128,
+            minFill: 0.4,
+            maxFill: 0.8,
             bgOpacity: 1,
-            fgOpacity: 0.5,
+            fgOpacity: 1
         };
         var o = visualOpts;
 
@@ -77,12 +81,20 @@
         var exampleNode = document.getElementById('example');
 
         function renderOpts(opts) {
-            bighex(exampleNode, opts);
+            halftone(exampleNode, opts);
         }
 
         // shorthand
         var r = function(){
-            visualOpts.palette = objToArray(visPalette);
+            //visualOpts.palette = objToArray(visPalette);
+            var targetC = factorPalette.target;
+            var seedC = factorPalette.seed;
+            var newC = getFactor(targetC, seedC);
+            //console.log('new factor', newC);
+            newC = toHex(newC);
+            console.log('product / factor / factor :', targetC, seedC, newC);
+
+            visualOpts.palette = [seedC, newC];
             renderOpts(visualOpts);
         };
 
@@ -110,8 +122,62 @@
             return folder;
         }
 
+        function toRgb(hex) {
+            if (hex[0] === '#') {
+                hex = hex.slice(1);
+            }
+            function toN(hexFrag) {
+                //console.log('toN', hexFrag, parseInt(hexFrag, 16)/255);
+                return parseInt(hexFrag, 16)/255
+            }
+            return {
+                r: toN(hex.slice(0,2)),
+                g: toN(hex.slice(2,4)),
+                b: toN(hex.slice(4,6))
+            }
+        }
+        function toHex(rgb) {
+            function fromN(N) {
+                var h = Math.round(N * 255).toString(16);
+                //console.log('fromN', N, h);
+                return (h.length === 1) ? "0" + h : h;
+            }
+            return '#' + fromN(rgb.r) + fromN(rgb.g) + fromN(rgb.b)
+        }
+
+        // get the missing factor based on a product color and a seed factor
+        function getFactor(product, factor) {
+            var p = toRgb(product);
+            var f = toRgb(factor);
+            var newf = {};
+
+            function div(a, b) {
+                if (b === 0) {
+                    return 0;
+                } else {
+                    return Math.min(a / b, 1);
+                }
+            }
+
+            newf.r = div(p.r, f.r);
+            newf.g = div(p.g, f.g);
+            newf.b = div(p.b, f.b);
+            return newf;
+        }
+
+        function multiplyColors(hex1, hex2) {
+            var c1 = toRgb(hex1);
+            var c2 = toRgb(hex2);
+            var product = {};
+            product.r = c1.r * c2.r;
+            product.g = c1.g * c2.g;
+            product.b = c1.b * c2.b;
+            console.log(product);
+            return product;
+        }
+
         // convenient way to expose a redraw button
-        var util = {redraw: r}
+        var util = {redraw: r, printFactors: printFactors}
         var gui;
 
         window.addEventListener('load', function(e){
@@ -125,32 +191,27 @@
             core.open();
             core.add(o, 'scale').min(16).max(256).step(1)
                 .onChange(r);
-            core.add(o, 'minScale').min(0.1).max(1).step(0.1)
+            core.add(o, 'minFill').min(0).max(1).step(0.1)
                 .onChange(r);
-            core.add(o, 'maxScale').min(0.1).max(1.5).step(0.1)
+            core.add(o, 'maxFill').min(0).max(1).step(0.1)
                 .onChange(r);
 
             var polys = gui.addFolder('Polys');
             polys.open();
             polys.add(o, 'bgOpacity').min(0).max(1).step(0.1)
                 .onChange(r);
-            polys.add(o, 'fgOpacity').min(0).max(1).step(0.05)
+            polys.add(o, 'fgOpacity').min(0).max(1).step(0.1)
                 .onChange(r);
 
-            paletteToControls(visPalette, polys);
+            //paletteToControls(visPalette, polys);
+            paletteToControls(factorPalette, polys);
 
             gui.add(util, 'redraw').name('Redraw →');
+            gui.add(util, 'printFactors').name('Log Factors →');
 
             gui.open(); // resizes the controls
 
             r(); // draws initial values
-        });
-
-        window.addEventListener('keypress', function(e) {
-            var kode = e.keyCode || e.which;
-            if (kode === 32) {
-                r();
-            }
         });
 
     </script>
