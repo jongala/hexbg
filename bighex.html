@@ -117,10 +117,6 @@
         window.addEventListener('load', function(e){
             gui = new dat.GUI();
 
-            gui.add(o, 'renderer').options('canvas', 'svg')
-                .onChange(r);
-            //gui.add(o, 'clear').onChange(r);
-
             var core = gui.addFolder('Basics');
             core.open();
             core.add(o, 'scale').min(16).max(256).step(1)

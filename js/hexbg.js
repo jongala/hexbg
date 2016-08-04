@@ -610,6 +610,9 @@
         var opts = {};
         opts = extend(extend(opts, defaults), options);
 
+        // enforce svg
+        opts.renderer = 'svg';
+
         // convert color constants to functions
         opts.bgColor = constToFunc(opts.bgColor);
         opts.fgColor = constToFunc(opts.fgColor);
@@ -623,11 +626,7 @@
         var newEl = false;
         if (!el) {
             container.innerHTML = '';
-            if (opts.renderer === 'svg') {
-                el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            } else {
-                el = document.createElement('canvas');
-            }
+            el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             newEl = true;
         }
         if (newEl || opts.clear) {
@@ -638,6 +637,7 @@
         }
 
         var bigCtx;
+        var fgCtx;
         var drawHex;
 
         if (opts.renderer === 'canvas') {
@@ -648,8 +648,12 @@
         el.innerHTML = '';
 
         bigCtx = document.createElementNS(SVG_NS, 'g');
-        bigCtx.setAttribute('id', 'big');
+        bigCtx.setAttribute('id', 'big-multiply');
         el.appendChild(bigCtx);
+
+        fgCtx = document.createElementNS(SVG_NS, 'g');
+        fgCtx.setAttribute('id', 'fg-color-dodge');
+        el.appendChild(fgCtx);
 
         drawHex = drawHexSVG;
         drawCircle = drawCircleSVG;
@@ -704,7 +708,7 @@
                 bigy = h - bigy;
             }
 
-            drawHex(bigCtx, bigx, bigy, bigSize,
+            drawHex(fgCtx, bigx, bigy, bigSize,
                 opts.fgColor(opts.palette, 0, 0, bigx, bigy, w, h),
                 null, // strokeColor
                 opts.fgOpacity,
