@@ -601,6 +601,8 @@
             maxScale: 1,
             bgOpacity: 1,
             fgOpacity: 0.5,
+            minCount: 5,
+            maxCount: 10,
             bgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
             fgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
             palette: ['#3399cc', '#ff0099'],
@@ -660,7 +662,7 @@
 
 
         // set vars
-        var big = Math.floor(randomInRange(5, 10));
+        var big = Math.floor(randomInRange(opts.minCount, opts.maxCount));
         var bigx;
         var bigy;
         var bigSize;
