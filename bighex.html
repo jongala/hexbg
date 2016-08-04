@@ -26,12 +26,21 @@
             font-size: 13px;
             color: #fff;
         }
+
+        #aspect {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            padding: 0.5em;
+            background: rgba(255, 255, 255, 0.7);
+        }
     </style>
 </head>
 <body>
     <div id="example"></div>
     <div class="controls">
     </div>
+    <div id="aspect">1.7</div>
     <script src="js/hexbg.js"></script>
     <script src="3p/DAT.GUI.min.js"></script>
     <script type="text/javascript">
@@ -148,6 +157,15 @@
                 r();
             }
         });
+
+        var aspectEl = document.getElementById('aspect');
+        var updateAspectDisplay = function(e) {
+            var a = window.innerWidth / window.innerHeight;
+            aspectEl.textContent = a.toFixed(3);
+        }
+        window.addEventListener('resize', updateAspectDisplay);
+        updateAspectDisplay();
+
 
     </script>
 </body>
