@@ -26,6 +26,10 @@
       return (PALETTE[Math.floor(PALETTE.length * Math.random())]);
     }
 
+    function randomInRange(min, max) {
+        return (min + (max - min) * Math.random());
+    }
+
     function setAttrs(el, attrs) {
         if (el && el.setAttribute) {
             for (a in attrs) {
@@ -52,11 +56,11 @@
     }
 
     // Draw a hexagon into ctx with the passed characteristics
-    function drawHexCanvas(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
+    function drawHexCanvas(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity, angle) {
         if (!ctx) return;
         size = size || 256;
 
-        var coords = getShapeCoords(x, y, size);
+        var coords = getShapeCoords(x, y, size, angle);
         var origin = coords.shift();
 
         ctx.beginPath();
@@ -83,22 +87,23 @@
         return ctx;
     }
 
-    function drawHexSVG(container, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
+    function drawHexSVG(container, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity, angle, attrs) {
         if (!container) return;
         size = size || 256;
         fillColor = fillColor || 'none';
         strokeColor = strokeColor || 'none';
+        attrs = attrs || {};
 
-        var coords = getShapeCoords(x, y, size);
+        var coords = getShapeCoords(x, y, size, angle);
         var d = ("M " + coords.join(" L ") + " Z").replace(/,/g, ' ');
         var path = document.createElementNS('http://www.w3.org/2000/svg','path');
-        setAttrs(path, {
+        setAttrs(path, extend({
             'd': d,
             'fill': fillColor,
             'fill-opacity': fillOpacity,
             'stroke': strokeColor,
             'stroke-opacity': strokeOpacity
-        });
+        }, attrs));
         container.appendChild(path);
     }
 
@@ -322,6 +327,258 @@
 
     }
 
+
+
+    // Tile the container
+    function halftone(container, options) {
+        var defaults = {
+            scale: 256,
+            layout: 'tile', // [tile, overlap]
+            minFill: 0,
+            maxFill: 1,
+            bgOpacity: 1,
+            fgOpacity: 0.5,
+            bgColor: function(palette, row, col, x, y, w, h) {return palette[0]},
+            fgColor: function(palette, row, col, x, y, w, h) {return palette[1]},
+            palette: ['#3399cc', '#ff0099'],
+            clear: true,
+            renderer: 'svg' // or 'svg'
+        };
+        var opts = {};
+        opts = extend(extend(opts, defaults), options);
+
+        // convert color constants to functions
+        opts.bgColor = constToFunc(opts.bgColor);
+        opts.fgColor = constToFunc(opts.fgColor);
+
+        var w = container.offsetWidth;
+        var h = container.offsetHeight;
+
+        // get hex layout function, generate hex points
+        var layoutFunc = layoutFunctions[opts.layout] || getTiledLayout;
+        var points = layoutFunc(w, h, opts.scale);
+
+        // Find or create canvas child
+        var el = container.querySelector(opts.renderer);
+        var newEl = false;
+        if (!el) {
+            container.innerHTML = '';
+            if (opts.renderer === 'svg') {
+                el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            } else {
+                el = document.createElement('canvas');
+            }
+            newEl = true;
+        }
+        if (newEl || opts.clear) {
+            setAttrs(el, {
+                'width': container.offsetWidth,
+                'height': container.offsetHeight
+            });
+        }
+
+        var bgCtx;
+        var fgCtx;
+        var drawHex;
+
+        if (opts.renderer === 'canvas') {
+            bgCtx = el.getContext('2d');
+            fgCtx = bgCtx;
+            drawHex = drawHexCanvas;
+
+            // optional clear
+            if (opts.clear) {
+                el.width = container.offsetWidth;
+                el.height = container.offsetHeight;
+                bgCtx.clearRect(0, 0, w, h);
+            }
+        } else if (opts.renderer === 'svg') {
+            el.setAttribute('xmlns', SVG_NS);
+
+            if (opts.clear || newEl) {
+                el.innerHTML = '';
+                bgCtx = document.createElementNS(SVG_NS, 'g');
+                bgCtx.setAttribute('id', 'background');
+                fgCtx = document.createElementNS(SVG_NS, 'g');
+                fgCtx.setAttribute('id', 'foreground');
+                el.appendChild(bgCtx);
+                el.appendChild(fgCtx);
+            } else {
+                bgCtx = el.getElementById('background');
+                fgCtx = el.getElementById('foreground');
+            }
+
+            drawHex = drawHexSVG;
+            drawCircle = drawCircleSVG;
+        }
+
+        // center point radius
+        var pr = opts.scale * opts.pointR;
+        var fillSize;
+
+        // draw fills
+        points.forEach(function(r, row) {
+            r.forEach(function(p, col) {
+                fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
+                drawHex(bgCtx, p[0], p[1], fillSize,
+                    opts.bgColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.bgOpacity, 0, 0, {'style': 'mix-blend-mode: multiply'});
+
+                fillSize = opts.scale * randomInRange(opts.minFill, opts.maxFill);
+                drawHex(fgCtx, p[0], p[1], fillSize,
+                    opts.fgColor(opts.palette, row, col, p[0], p[1], w, h),
+                    null,
+                    opts.fgOpacity, 0, Math.PI/6, {'style': 'mix-blend-mode: multiply'});
+            });
+        });
+
+
+        // if new canvas child was created, append it
+        if (newEl) {
+            container.appendChild(el);
+        }
+
+    }
+
+
+    // Just big hexagons
+    function bighex(container, options) {
+        var defaults = {
+            scale: 256,
+            minScale: 0,
+            maxScale: 1,
+            bgOpacity: 1,
+            fgOpacity: 0.5,
+            minCount: 5,
+            maxCount: 10,
+            bgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
+            fgColor: function(palette, row, col, x, y, w, h) {return randomColor(palette)},
+            palette: ['#3399cc', '#ff0099'],
+            clear: true,
+            renderer: 'svg' // or 'svg'
+        };
+        var opts = {};
+        opts = extend(extend(opts, defaults), options);
+
+        // enforce svg
+        opts.renderer = 'svg';
+
+        // convert color constants to functions
+        opts.bgColor = constToFunc(opts.bgColor);
+        opts.fgColor = constToFunc(opts.fgColor);
+
+        var w = container.offsetWidth;
+        var h = container.offsetHeight;
+
+
+        // Find or create canvas child
+        var el = container.querySelector(opts.renderer);
+        var newEl = false;
+        if (!el) {
+            container.innerHTML = '';
+            el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            newEl = true;
+        }
+        if (newEl || opts.clear) {
+            setAttrs(el, {
+                'width': container.offsetWidth,
+                'height': container.offsetHeight
+            });
+        }
+
+        var bigCtx;
+        var fgCtx;
+        var drawHex;
+
+        if (opts.renderer === 'canvas') {
+            return;
+        }
+
+        el.setAttribute('xmlns', SVG_NS);
+        el.innerHTML = '';
+
+        bigCtx = document.createElementNS(SVG_NS, 'g');
+        bigCtx.setAttribute('id', 'big-multiply');
+        el.appendChild(bigCtx);
+
+        fgCtx = document.createElementNS(SVG_NS, 'g');
+        fgCtx.setAttribute('id', 'fg-color-dodge');
+        el.appendChild(fgCtx);
+
+        drawHex = drawHexSVG;
+        drawCircle = drawCircleSVG;
+
+
+        // set vars
+        var big = Math.floor(randomInRange(opts.minCount, opts.maxCount));
+        var bigx;
+        var bigy;
+        var bigSize;
+        var bigAngle;
+
+
+        // Draw 2 base hexagons
+        function randomBase(right) {
+            bigSize = Math.min(w,h) * randomInRange(0.7, 1.2);
+            bigAngle = randomInRange(0, 60);
+            bigx = w * randomInRange(0.2, 0.3);
+            bigy = h * randomInRange(0.2, 0.3);
+            if (right) {
+                bigx = w - bigx;
+            }
+            if (Math.random() > 0.5) {
+                bigy = h - bigy;
+            }
+            drawHex(bigCtx, bigx, bigy, bigSize,
+                randomColor(opts.palette.slice(0,2)),
+                null, // strokeColor
+                opts.bgOpacity,
+                0, // strokeOpacity
+                bigAngle,
+                {
+                    'style': 'mix-blend-mode: multiply'
+                }
+                );
+        }
+        randomBase(0); // leftside
+        randomBase(1); // rightside
+
+
+        // Draw randomized overlays
+        while (big) {
+            big--;
+
+            bigSize = Math.min(w,h) * randomInRange(opts.minScale, opts.maxScale);
+            bigAngle = randomInRange(0, 60);
+
+            bigx = randomInRange(0, w);
+            // place small hex near centerline, bigger near top/bottom
+            bigy = h/2 * randomInRange(0, 1 - (bigSize/h));
+            if (Math.random() < 0.5) {
+                bigy = h - bigy;
+            }
+
+            drawHex(fgCtx, bigx, bigy, bigSize,
+                opts.fgColor(opts.palette, 0, 0, bigx, bigy, w, h),
+                null, // strokeColor
+                opts.fgOpacity,
+                0, // strokeOpacity
+                bigAngle,
+                {
+                    'style': 'mix-blend-mode: color-dodge'
+                }
+                );
+        }
+
+        // if new canvas child was created, append it
+        if (newEl) {
+            container.appendChild(el);
+        }
+    }
+
     // export
     window.hexBg = hexBg;
+    window.halftone = halftone;
+    window.bighex = bighex;
 }());
