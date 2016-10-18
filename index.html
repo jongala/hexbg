@@ -36,7 +36,7 @@
         <button onclick="loadOpts(exampleGrid)">Grid</button>
         <button onclick="loadOpts(exampleOverlap)">Overlap</button>
         <button onclick="loadOpts(exampleScatter)">Overlap Scatter</button>
-        <!--<button onclick="loadOpts(exampleTiled)">Tiled</button>-->
+        <button onclick="loadOpts(exampleTiled)">Tiled</button>
     </div>
     <script src="js/hexbg.js"></script>
     <script src="3p/DAT.GUI.min.js"></script>
@@ -127,6 +127,7 @@
             scale: 48,
             pointR: 0.07,
             layout: 'overlap',
+            fillColor: 'palette',
             fillOpacity: 0.5,
             pointColor:'#ffffff',
             pointOpacity: 0.2,
@@ -141,6 +142,7 @@
             scale: 96,
             pointR: 0.07,
             layout: 'grid',
+            fillColor: 'palette',
             fillOpacity: 0.5,
             pointColor:'#ffffff',
             pointOpacity: 0.5,

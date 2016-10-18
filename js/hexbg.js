@@ -221,7 +221,7 @@
         // convert color constants to functions
         opts.pointColor = constToFunc(opts.pointColor);
         opts.strokeColor = constToFunc(opts.strokeColor);
-        opts.fillColor = constToFunc(opts.fillColor);
+        opts.fillColor = (opts.fillColor === 'palette') ? randomColor : constToFunc(opts.fillColor);
 
         var w = container.offsetWidth;
         var h = container.offsetHeight;
