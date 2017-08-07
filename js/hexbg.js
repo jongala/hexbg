@@ -51,20 +51,28 @@
         return c;
     }
 
+    var hexoff = 0;
+
     // Draw a hexagon into ctx with the passed characteristics
     function drawHexCanvas(ctx, x, y, size, fillColor, strokeColor, fillOpacity, strokeOpacity) {
         if (!ctx) return;
         size = size || 256;
 
         var coords = getShapeCoords(x, y, size);
-        var origin = coords.shift();
+        //console.log(coords);
+        var origin = coords[0];
+        //console.log(coords);
 
         ctx.beginPath();
         ctx.moveTo(origin[0], origin[1]);
         coords.forEach(function (p, i) {
-            ctx.lineTo(p[0], p[1]);
+            if (i < coords.length) {
+                ctx.lineTo(p[0], p[1]);
+            }
+
         });
         ctx.lineTo(origin[0], origin[1]);
+        ctx.closePath();
 
         if (fillColor) {
             ctx.fillStyle = fillColor;
@@ -76,9 +84,46 @@
             ctx.strokeStyle = strokeColor;
             ctx.globalAlpha = strokeOpacity;
             ctx.stroke();
+
+            /*var base = coords[0];
+            ctx.beginPath();
+            ctx.moveTo(base[0], base[1]);
+            ctx.lineTo(coords[2][0], coords[2][1]);
+            ctx.moveTo(base[0], base[1]);
+            ctx.lineTo(coords[3][0], coords[3][1]);
+            ctx.moveTo(base[0], base[1]);
+            ctx.lineTo(coords[4][0], coords[4][1]);*/
+
+
+            var offset = Math.floor(coords.length * Math.random());
+            offset = ++hexoff % coords.length;
+            //offset = 0;
+            console.log(offset);
+            var p = coords[offset];
+            ctx.beginPath();
+
+            ctx.moveTo(coords[offset][0], coords[offset][1]);
+            p = coords[(offset + 2) % coords.length];
+            ctx.lineTo(p[0], p[1]);
+
+            ctx.moveTo(coords[offset][0], coords[offset][1]);
+            p = coords[(offset + 3) % coords.length];
+            ctx.lineTo(p[0], p[1]);
+
+            ctx.moveTo(coords[offset][0], coords[offset][1]);
+            p = coords[(offset + 4) % coords.length];
+            ctx.lineTo(p[0], p[1]);
+
+            ctx.closePath();
+            ctx.stroke();
         }
 
-        ctx.closePath();
+
+
+        // Patterns
+
+
+
 
         return ctx;
     }

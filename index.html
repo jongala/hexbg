@@ -180,10 +180,10 @@
             fillColor: blendPlane,
             fillOpacity: 1,
             pointColor:'#ffffff',
-            pointOpacity: 0.5,
-            strokeOpacity: 0.1,
+            pointOpacity: 0,
+            strokeOpacity: 0.75,
             strokeColor: '#ffffff',
-            renderer:'svg'
+            //renderer:'svg'
         };
 
         var exampleSeeded = {
@@ -205,7 +205,7 @@
         // GUI controlled opts
         var visualOpts = {
             renderer: 'canvas',
-            layout: 'overlap',
+            layout: 'tile',
             scale: 96,
             pointR: 0.125,
             fillOpacity: 0.5,
@@ -215,6 +215,7 @@
             pointColor: '#fff',
             clear: true
         };
+        visualOpts = Object.assign({}, visualOpts, exampleTiled);
         var o = visualOpts;
 
 
