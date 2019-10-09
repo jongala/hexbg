@@ -1,0 +1,219 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Halfhex</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+        }
+        #example,
+        #example canvas {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #example {}
+
+        .controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            padding:0.5em;
+            font-size: 13px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="example"></div>
+    <div class="controls">
+    </div>
+    <script src="js/hexbg.js"></script>
+    <script src="3p/DAT.GUI.min.js"></script>
+    <script type="text/javascript">
+        function objToArray(obj) {
+            var arr = [];
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    arr.push(obj[key]);
+                }
+            }
+            return arr;
+        }
+
+        function arrayToObj(arr) {
+            var obj = {};
+            arr.forEach(function(val, i){
+                obj[i] = val;
+            });
+            return obj;
+        }
+
+        // Default Palette
+        DEFAULT_PALETTE = ["#ff0099", "#3399cc", "#774aa4", "#ffcc00"];
+
+        factorPalette = {target: '#774aa4', seed:'#7ac0e3'};
+
+
+       // GUI controlled colors
+        visPalette = arrayToObj(DEFAULT_PALETTE);
+
+        function printFactors() {
+            console.log(factorPalette.target, factorPalette.seed, toHex(getFactor(factorPalette.target, factorPalette.seed)))
+        }
+
+        // GUI controlled opts
+        var visualOpts = {
+            renderer: 'svg',
+            scale: 128,
+            minFill: 0.4,
+            maxFill: 0.8,
+            bgOpacity: 1,
+            fgOpacity: 1
+        };
+        var o = visualOpts;
+
+
+        var exampleNode = document.getElementById('example');
+
+        function renderOpts(opts) {
+            halftone(exampleNode, opts);
+        }
+
+        // shorthand
+        var r = function(){
+            //visualOpts.palette = objToArray(visPalette);
+            var targetC = factorPalette.target;
+            var seedC = factorPalette.seed;
+            var newC = getFactor(targetC, seedC);
+            //console.log('new factor', newC);
+            newC = toHex(newC);
+            console.log('product / factor / factor :', targetC, seedC, newC);
+
+            visualOpts.palette = [seedC, newC];
+            renderOpts(visualOpts);
+        };
+
+        function loadOpts(opts) {
+            visualOpts = extend(visualOpts, opts);
+            renderOpts(visualOpts);
+
+            // Update the visual controls
+            gui.__controllers.forEach(function(c){c.updateDisplay()});
+            var folders = gui.__folders;
+            for (key in folders) {
+                if (folders.hasOwnProperty(key)) {
+                    folders[key].__controllers.forEach(function(c){c.updateDisplay()});
+                }
+            }
+        }
+
+        function paletteToControls(palette, folder) {
+            for (c in palette) {
+                if (palette.hasOwnProperty(c)) {
+                    folder.addColor(palette, c)
+                        .onChange(r);
+                }
+            }
+            return folder;
+        }
+
+        function toRgb(hex) {
+            if (hex[0] === '#') {
+                hex = hex.slice(1);
+            }
+            function toN(hexFrag) {
+                //console.log('toN', hexFrag, parseInt(hexFrag, 16)/255);
+                return parseInt(hexFrag, 16)/255
+            }
+            return {
+                r: toN(hex.slice(0,2)),
+                g: toN(hex.slice(2,4)),
+                b: toN(hex.slice(4,6))
+            }
+        }
+        function toHex(rgb) {
+            function fromN(N) {
+                var h = Math.round(N * 255).toString(16);
+                //console.log('fromN', N, h);
+                return (h.length === 1) ? "0" + h : h;
+            }
+            return '#' + fromN(rgb.r) + fromN(rgb.g) + fromN(rgb.b)
+        }
+
+        // get the missing factor based on a product color and a seed factor
+        function getFactor(product, factor) {
+            var p = toRgb(product);
+            var f = toRgb(factor);
+            var newf = {};
+
+            function div(a, b) {
+                if (b === 0) {
+                    return 0;
+                } else {
+                    return Math.min(a / b, 1);
+                }
+            }
+
+            newf.r = div(p.r, f.r);
+            newf.g = div(p.g, f.g);
+            newf.b = div(p.b, f.b);
+            return newf;
+        }
+
+        function multiplyColors(hex1, hex2) {
+            var c1 = toRgb(hex1);
+            var c2 = toRgb(hex2);
+            var product = {};
+            product.r = c1.r * c2.r;
+            product.g = c1.g * c2.g;
+            product.b = c1.b * c2.b;
+            console.log(product);
+            return product;
+        }
+
+        // convenient way to expose a redraw button
+        var util = {redraw: r, printFactors: printFactors}
+        var gui;
+
+        window.addEventListener('load', function(e){
+            gui = new dat.GUI();
+
+            gui.add(o, 'renderer').options('canvas', 'svg')
+                .onChange(r);
+            //gui.add(o, 'clear').onChange(r);
+
+            var core = gui.addFolder('Basics');
+            core.open();
+            core.add(o, 'scale').min(16).max(256).step(1)
+                .onChange(r);
+            core.add(o, 'minFill').min(0).max(1).step(0.1)
+                .onChange(r);
+            core.add(o, 'maxFill').min(0).max(1).step(0.1)
+                .onChange(r);
+
+            var polys = gui.addFolder('Polys');
+            polys.open();
+            polys.add(o, 'bgOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+            polys.add(o, 'fgOpacity').min(0).max(1).step(0.1)
+                .onChange(r);
+
+            //paletteToControls(visPalette, polys);
+            paletteToControls(factorPalette, polys);
+
+            gui.add(util, 'redraw').name('Redraw →');
+            gui.add(util, 'printFactors').name('Log Factors →');
+
+            gui.open(); // resizes the controls
+
+            r(); // draws initial values
+        });
+
+    </script>
+</body>
+</html>
